@@ -30,10 +30,10 @@ add_executable(ULTRA_LUCK_UP
         code/load_menus/load_menus.c
         code/slider/slider.c
         code/tools/tools.c
-
         code/audio/audio.c
         code/Background/background.c
         code/Player/player.c
+        code/arduino/arduino.c  # Add this line if it's missing
 )
 
 # Link libraries

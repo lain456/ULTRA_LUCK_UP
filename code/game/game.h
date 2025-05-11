@@ -124,6 +124,7 @@ typedef struct {
     int isHovered;
     int isPressed;
     int isClicked;
+    int isSelected;                 // True if the button is selected
 }Button;
 
 
@@ -165,6 +166,7 @@ typedef struct
 {
     // menu elements :
     Button *buttonlist;
+    int selected_index;             // Index of the currently selected button
     int b_ct;
     Text *txtlist;
 
@@ -304,6 +306,16 @@ typedef struct {
 
 
 typedef struct {
+    int serial_fd;                  // File descriptor for serial port
+    char serial_buffer[256];        // Buffer for serial data
+    int serial_buffer_len;          // Length of data in buffer
+    Uint32 last_nav_time;           // Time of last navigation
+    ArduinoStatus arduino_status;   // Current Arduino state
+    ArduinoStatus prev_arduino_status; // Previous Arduino state for edge detection
+
+
+
+
     SDL_Event event;
 
 
@@ -423,9 +435,32 @@ typedef struct {
 
 
 
+    int selected_button_index;      // Index of the currently selected button
+    Uint32 last_joystick_nav;       // Time of last joystick navigation (for cooldown)
+    int joystick_nav_cooldown;      // Cooldown in ms for joystick navigation
+
+    // FPS control
+    Uint32 last_frame_time;
+
+     // Cooldown in ms for joystick navigation
+    int select;                     // Flag to indicate joystick selection
+    int controller_active;          // Flag to indicate if controller navigation is active
+    Uint32 last_mouse_motion;       // Time of last mouse motion event
+
+
+
+
+
+
+
+
+
+
+
+
 
     // arduino
-    ArduinoStatus arduino_status;
+
 
 
 
