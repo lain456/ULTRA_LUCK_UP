@@ -10,10 +10,16 @@
 #include "text/txt.h"
 #include "menu/menu.h"
 #include "arduino/arduino.h"
-
-
+#include "shity_code/shity_code.h"
 
 int main(int argc, char *argv[]) {
+
+    //return shity_function();
+
+
+
+
+
     Game game;
     Ini_Game(&game);
     load_background(&game);
@@ -21,11 +27,13 @@ int main(int argc, char *argv[]) {
     game.sfx = Mix_LoadWAV(HOVER_SFX_PATH);
     Mix_PlayMusic(game.music, -1);
 
-    // Initialize serial port for Arduino (adjust port as needed)
+    // Attempt to initialize serial port for Arduino (optional)
     if (!init_serial(&game, "/dev/ttyUSB0")) {
-        printf("Serial initialization failed\n");
-        SDL_Quit();
-        return 1;
+        printf("Serial initialization failed, continuing with keyboard input\n");
+        game.controller_active = 0; // Disable controller support
+    } else {
+        printf("Serial initialized, but disabling controller for debugging\n");
+        game.controller_active = 0; // Force disable for now
     }
 
     M_node n, n0, n1, n2;
@@ -54,55 +62,53 @@ int main(int argc, char *argv[]) {
         game.released_mouse = 0;
         game.mouse_pressed = 0;
 
-        // Read serial data to update game.arduino_status
-        parse_serial_data(&game);
+        // Skip serial data parsing (controller disabled)
+        // if (game.controller_active) {
+        //     parse_serial_data(&game);
+        // }
 
-        // Debug: Print joystick values and controller state
-        static Uint32 last_debug_print = 0;
-        if (SDL_GetTicks() - last_debug_print > 500) { // Print every 500ms
-            printf("Controller active: %d, JX: %d, JY: %d, B13: %d, Selected index: %d\n",
-                   game.controller_active, game.arduino_status.JX, game.arduino_status.JY,
-                   game.arduino_status.B13, game.selected_button_index);
-            last_debug_print = SDL_GetTicks();
-        }
+        // Skip controller debug prints
+        // static Uint32 last_debug_print = 0;
+        // if (game.controller_active && SDL_GetTicks() - last_debug_print > 500) {
+        //     printf("Controller active: %d, JX: %d, JY: %d, B13: %d, Selected index: %d\n",
+        //            game.controller_active, game.arduino_status.JX, game.arduino_status.JY,
+        //            game.arduino_status.B13, game.selected_button_index);
+        //     last_debug_print = SDL_GetTicks();
+        // }
 
-        // Handle controller navigation (only in menu state and if controller_active)
-        if (game.state == 1 && game.current_node && game.current_node->menu && game.controller_active) {
-            Uint32 current_time = SDL_GetTicks();
-            if (current_time - game.last_joystick_nav >= game.joystick_nav_cooldown) {
-                // Initialize selection if none exists
-                if (game.selected_button_index < 0 && game.current_node->menu->b_ct > 0) {
-                    game.selected_button_index = 0;
-                    game.select = 1;
-                    printf("Initialized controller selection to button 0\n");
-                }
+        // Skip controller navigation
+        // if (game.state == 1 && game.current_node && game.current_node->menu && game.controller_active) {
+        //     Uint32 current_time = SDL_GetTicks();
+        //     if (current_time - game.last_joystick_nav >= game.joystick_nav_cooldown) {
+        //         if (game.selected_button_index < 0 && game.current_node->menu->b_ct > 0) {
+        //             game.selected_button_index = 0;
+        //             game.select = 1;
+        //             printf("Initialized controller selection to button 0\n");
+        //         }
+        //         if (game.arduino_status.JY > 550 && game.prev_arduino_status.JY <= 550) {
+        //             game.selected_button_index--;
+        //             if (game.selected_button_index < 0) {
+        //                 game.selected_button_index = game.current_node->menu->b_ct - 1;
+        //             }
+        //             game.select = 1;
+        //             game.last_joystick_nav = current_time;
+        //             printf("Joystick up, selected index: %d\n", game.selected_button_index);
+        //         } else if (game.arduino_status.JY < 450 && game.prev_arduino_status.JY >= 450) {
+        //             game.selected_button_index++;
+        //             if (game.selected_button_index >= game.current_node->menu->b_ct) {
+        //                 game.selected_button_index = 0;
+        //             }
+        //             game.select = 1;
+        //             game.last_joystick_nav = current_time;
+        //             printf("Joystick down, selected index: %d\n", game.selected_button_index);
+        //         }
+        //     }
+        // }
 
-                // Joystick Y-axis for up/down navigation
-                if (game.arduino_status.JY > 550 && game.prev_arduino_status.JY <= 550) { // Joystick up
-                    game.selected_button_index--;
-                    if (game.selected_button_index < 0) {
-                        game.selected_button_index = game.current_node->menu->b_ct - 1;
-                    }
-                    game.select = 1;
-                    game.last_joystick_nav = current_time;
-                    printf("Joystick up, selected index: %d\n", game.selected_button_index);
-                } else if (game.arduino_status.JY < 450 && game.prev_arduino_status.JY >= 450) { // Joystick down
-                    game.selected_button_index++;
-                    if (game.selected_button_index >= game.current_node->menu->b_ct) {
-                        game.selected_button_index = 0;
-                    }
-                    game.select = 1;
-                    game.last_joystick_nav = current_time;
-                    printf("Joystick down, selected index: %d\n", game.selected_button_index);
-                }
-
-
-
-            }
-        }
-
-        // Update previous Arduino status for edge detection
-        game.prev_arduino_status = game.arduino_status;
+        // Skip Arduino status update
+        // if (game.controller_active) {
+        //     game.prev_arduino_status = game.arduino_status;
+        // }
 
         while (SDL_PollEvent(&game.event)) {
             switch (game.event.type) {
@@ -140,17 +146,15 @@ int main(int argc, char *argv[]) {
             case 1:
                 update_buttons(&game, game.current_node->menu->buttonlist, game.current_node->menu->b_ct);
 
-
-            // Button B13 for confirming selection
-            if (game.arduino_status.B13 == 1 ) { // B13 pressed
-                printf("b13\n");
-                game.controller_active = 0;
-                if (game.selected_button_index >= 0 && game.selected_button_index < game.current_node->menu->b_ct) {
-                    game.current_node->menu->buttonlist[game.selected_button_index].isClicked = 1;
-                    printf("B13 pressed, clicked button: %d\n", game.selected_button_index);
-                }
-                //game.last_joystick_nav = current_time;
-            }
+                // Skip B13 button handling
+                // if (game.controller_active && game.arduino_status.B13 == 1) {
+                //     printf("b13\n");
+                //     game.controller_active = 0;
+                //     if (game.selected_button_index >= 0 && game.selected_button_index < game.current_node->menu->b_ct) {
+                //         game.current_node->menu->buttonlist[game.selected_button_index].isClicked = 1;
+                //         printf("B13 pressed, clicked button: %d\n", game.selected_button_index);
+                //     }
+                // }
 
                 switch (game.current_node->id) {
                     case -1: // WIP menu
@@ -169,7 +173,6 @@ int main(int argc, char *argv[]) {
                             game.select = 0;
                             game.controller_active = 0;
                             break;
-
                         }
                         if (game.current_node->menu->buttonlist[1].isClicked) { // Yes
                             game.quite = 1;
@@ -181,7 +184,6 @@ int main(int argc, char *argv[]) {
                             game.selected_button_index = -1;
                             game.select = 0;
                             game.controller_active = 0;
-                            //printf("gaming...\n");
                             break;
                         }
                         if (game.current_node->menu->buttonlist[1].isClicked) { // Options
@@ -212,19 +214,19 @@ int main(int argc, char *argv[]) {
                             update_txt(&game.current_node->menu->txtlist[0], ". . . ", BLACK, game.big_main_font);
                             game.music_volume = (game.music_volume == 0) ? 69 : 0;
                             update_txt(&game.current_node->menu->buttonlist[0].txt,
-                                     game.music_volume != 0 ? "music on" : "music off", GOLD, NULL);
+                                      game.music_volume != 0 ? "music on" : "music off", GOLD, NULL);
                             break;
                         }
                         if (game.current_node->menu->buttonlist[1].isClicked) { // SFX toggle
                             game.sfx_volume = (game.sfx_volume == 0) ? 69 : 0;
                             update_txt(&game.current_node->menu->buttonlist[1].txt,
-                                     game.sfx_volume != 0 ? "sfx : on" : "sfx : off", GOLD, NULL);
+                                      game.sfx_volume != 0 ? "sfx : on" : "sfx : off", GOLD, NULL);
                             break;
                         }
                         if (game.current_node->menu->buttonlist[2].isClicked) { // Fullscreen toggle
                             toggle_fullscreen(&game);
                             update_txt(&game.current_node->menu->buttonlist[2].txt,
-                                     game.fullscreen ? "fullscreen off" : "fullscreen on", GOLD, game.mini_font);
+                                      game.fullscreen ? "fullscreen off" : "fullscreen on", GOLD, game.mini_font);
                             break;
                         }
                         if (game.current_node->menu->buttonlist[3].isClicked) { // Return
@@ -265,11 +267,17 @@ int main(int argc, char *argv[]) {
             SDL_Delay(frame_duration - frame_time);
         }
         game.last_frame_time = SDL_GetTicks();
-        game.prev_arduino_status = game.arduino_status;
+        // Skip Arduino status update
+        // if (game.controller_active) {
+        //     game.prev_arduino_status = game.arduino_status;
+        // }
     }
 
     // Cleanup
-    close(game.serial_fd);
+    // Skip serial cleanup (controller disabled)
+    // if (game.controller_active) {
+    //     close(game.serial_fd);
+    // }
     SDL_Quit();
     return 0;
 }

@@ -74,7 +74,7 @@
 
 
 // gameplay :
-#define SQUARE_SIZE 150
+#define SQUARE_SIZE 100
 #define MOVE_SPEED 10
 #define FPS 120
 #define CYCLE 32
@@ -274,6 +274,8 @@ typedef struct {
     int moveLeft,moveRight,moveUp,moveDown;
 
     // animation spritsheet WIP
+    SDL_Rect rect;
+    SDL_Rect h_rect;
     SDL_Surface *surface;
     SDL_Surface * flying_to_the_right[8];
     SDL_Surface * flying_to_the_left[8];
@@ -288,7 +290,23 @@ typedef struct {
     // input ...crap to make customizable
     Input input;
 
+
+
+    int jump_count;       // Number of jumps performed
+    int max_jumps;
+    int jump_trigger;
+
+
 } Player;
+
+
+
+
+// Platform structure
+typedef struct {
+    SDL_Rect rect; // Position and size
+    SDL_Rect h_rect;
+} Platform;
 
 
 

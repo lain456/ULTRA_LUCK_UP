@@ -33,7 +33,9 @@ add_executable(ULTRA_LUCK_UP
         code/audio/audio.c
         code/Background/background.c
         code/Player/player.c
-        code/arduino/arduino.c  # Add this line if it's missing
+        code/arduino/arduino.c
+        shity_code/shity_code.c
+        shity_code/shity_code.h  # Add this line if it's missing
 )
 
 # Link libraries
