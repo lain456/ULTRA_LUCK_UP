@@ -1,6 +1,10 @@
 #include "game.h"
 #include "../tools/tools.h"
 #include "../Player/player.h"
+#include "../Background/background.h"
+#include "init.h"
+
+
 
 int gameplay(Game *game) {
     if (!game || !game->screen || !game->player) {
@@ -8,6 +12,12 @@ int gameplay(Game *game) {
         game->state = 1;
         return 0;
     }
+
+
+    // the background should be updated here    -lain
+
+
+    SDL_BlitSurface(create_color_surface(game->width,game->height , 200,200,200) , NULL , game->background , NULL);
 
     // Initialize platform
     Platform platform;
@@ -35,7 +45,11 @@ int gameplay(Game *game) {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) game->quite = 1;
-            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) game->state = 1;
+            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
+            {
+                game->state = 1;
+
+            }
             handlePlayerMovement(game->player, e);
         }
 
@@ -48,7 +62,18 @@ int gameplay(Game *game) {
         if (frame_time < 1000 / game->fps) {
             SDL_Delay(1000 / game->fps - frame_time);
         }
+
+
+
+
+
     }
+
+
+    //Ini_Game(game);
+
+    //render_background(&game);
+
 
     return 0;
 }

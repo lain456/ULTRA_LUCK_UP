@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
     memset(game.player, 0, sizeof(Player));
     game.player->player_num = 0; // Default to yellow bird
     initPlayer(game.player);
+    //initPlayer(game.player2);
     printf("Player initialized in main (player_num=%d)\n", game.player->player_num);
 
     // Attempt to initialize serial port for Arduino (optional)
@@ -41,17 +42,19 @@ int main(int argc, char *argv[]) {
         game.controller_active = 0;
     }
 
-    M_node n, n0, n1, n2, n3;
+    M_node n, n0, n1, n2, n3,n4;
     Menu play = play_menu(game);
     Menu exit = exit_menu(game);
     Menu options = options_menu(game);
     Menu wip = WIP_menu(game);
     Menu player_choice = player_choice_menu(game);
+    Menu multiplayer = multiplayer_menu(game);
 
     node_Init(&n0, &exit, 0);
     node_Init(&n1, &play, 1);
     node_Init(&n2, &options, 2);
     node_Init(&n3, &player_choice, 3);
+    node_Init(&n4, &multiplayer, 4);
     node_Init(&n, &wip, -1);
 
     n0.back = &n1;
@@ -59,6 +62,7 @@ int main(int argc, char *argv[]) {
     n2.back = &n1;
     n.back = &n1;
     n3.back = &n1;
+    n4.back = &n1;
 
     game.current_node = &n1;
     game.current_menu = n1.menu;
@@ -102,8 +106,15 @@ int main(int argc, char *argv[]) {
             }
         }
 
+
+
+
+
+        render_background(&game);
+
         switch (game.state) {
             case 1:
+
                 update_buttons(&game, game.current_node->menu->buttonlist, game.current_node->menu->b_ct);
 
                 switch (game.current_node->id) {
@@ -130,8 +141,9 @@ int main(int argc, char *argv[]) {
                         break;
                     case 1: // Play menu
                         if (game.current_node->menu->buttonlist[0].isClicked) { // Play
-                            printf("choosing player..\n");
-                            game.current_node = &n3;
+                            printf("choosing player.. multi or mono\n");
+                            game.current_node = &n4;
+
                             game.selected_button_index = -1;
                             game.select = 0;
                             game.controller_active = 0;
@@ -217,15 +229,42 @@ int main(int argc, char *argv[]) {
                             break;
                         }
                         break;
+
+                    case 4:
+                        if (game.current_node->menu->buttonlist[0].isClicked) {
+                            game.multiplayer = 0;
+                            game.current_node = &n3;
+                            game.selected_button_index = -1;
+                            game.select = 0;
+                            game.controller_active = 0;
+                            break;
+                        }
+
+                        if (game.current_node->menu->buttonlist[1].isClicked){
+                            game.multiplayer = 1;
+
+                            game.current_node = &n3;
+                            game.selected_button_index = -1;
+                            game.select = 0;
+                            game.controller_active = 0;
+                            break;
+                        }
+
+
+
+
                     default:
                         printf("Invalid menu ID\n");
                         break;
                 }
 
-                render_background(&game);
-                if (game.state) render_menu(&game, game.current_node->menu);
+
+
+                    render_menu(&game, game.current_node->menu);
+
                 break;
             case 0:
+
                 gameplay(&game);
                 break;
         }
@@ -245,6 +284,7 @@ int main(int argc, char *argv[]) {
 
     // Cleanup
     if (game.player) {
+
         freePlayer(game.player);
         free(game.player);
         game.player = NULL;

@@ -208,6 +208,7 @@ typedef struct {
 } Platform;
 
 typedef struct {
+    int multiplayer; // 0/1 condition
     int serial_fd;                  // File descriptor for serial port
     char serial_buffer[256];        // Buffer for serial data
     int serial_buffer_len;          // Length of data in buffer
@@ -275,6 +276,7 @@ typedef struct {
     int select;                     // Flag to indicate joystick selection
     int controller_active;          // Flag to indicate if controller navigation is active
     Uint32 last_mouse_motion;       // Time of last mouse motion event
+
 }Game;
 
 int gameplay(Game *game);

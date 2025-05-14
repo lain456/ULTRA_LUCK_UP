@@ -727,7 +727,7 @@ void renderPlayer(SDL_Surface *screen, Player *player) {
 
     // Debug: Uncomment to visualize player hitbox (red)
     //SDL_FillRect(screen, &player->rect, SDL_MapRGB(screen->format, 0, 255, 0));
-    SDL_FillRect(screen, &player->h_rect, SDL_MapRGB(screen->format, 255, 0, 0));
+    //SDL_FillRect(screen, &player->h_rect, SDL_MapRGB(screen->format, 255, 0, 0));
 }
 
 void freePlayer(Player *player) {
