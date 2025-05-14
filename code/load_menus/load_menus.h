@@ -23,5 +23,6 @@ Menu play_menu(Game game) ;
 Menu exit_menu(Game game) ;
 Menu options_menu(Game game) ;
 Menu WIP_menu(Game game) ;
+Menu player_choice_menu(Game game);
 
 #endif //TEST_H

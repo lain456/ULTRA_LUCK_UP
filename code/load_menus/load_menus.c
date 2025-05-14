@@ -222,6 +222,48 @@ Menu WIP_menu(Game game)
 
 }
 
+Menu player_choice_menu(Game game)
+{
+
+
+
+
+    Menu new_menu;
+    Init_Menu(&new_menu);
+
+    // custom menu (general)
+    new_menu.b_ct =2;
+    new_menu.txt_ct =1;
+    new_menu.t_margine =10; // useless in this case cuz we only have 1 txt
+    new_menu.b_margine =250;
+    char *button_strings[] = {"yellow","purple"};
+
+
+
+    new_menu.buttonlist = (Button*)malloc(sizeof(Button)*new_menu.b_ct);
+    new_menu.txtlist = (Text*)malloc(sizeof(Text)*new_menu.txt_ct);
+
+
+    for (int i = 0; i < new_menu.b_ct; i++)
+    {
+        new_menu.buttonlist[i] = *create_button(&game,(WIDTH - game.x_button_size)*5/20,(HEIGHT - game.y_button_size)*3/4 ,game.y_button_size,game.x_button_size,button_strings[i],WHITE,1);
+    }
+
+
+    x_order_buttons(new_menu.buttonlist ,new_menu.b_margine,new_menu.b_ct);
+
+
+    new_menu.txtlist[0] = *create_txt(" which color do you like ? ",game.big_main_font,BLACK,WIDTH*1/5,HEIGHT*2/5);
+
+
+    return new_menu;
+
+
+
+}
+
+
+
 
 
 

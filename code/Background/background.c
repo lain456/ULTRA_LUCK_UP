@@ -32,8 +32,9 @@ void load_background(Game *game) {
 
     // GHASSAN THIS IS YOUR JOB
     // load static images like this
-    SDL_BlitSurface(scaleSurface(IMG_Load(LOGO_PATH),logo_w, logo_h),NULL,background,&(SDL_Rect){logo_rect.x = game->width*1/20 ,game->height*15/20 , logo_w , logo_h});
-    SDL_BlitSurface(scaleSurface(IMG_Load(LOGO2_PATH),logo_w, logo_h),NULL,background,&(SDL_Rect){logo_rect.x = game->width*1/20 ,game->height*15/20  +100, logo_w , logo_h});
+    SDL_Surface *logo;
+    SDL_BlitSurface(scaleSurface(IMG_Load(LOGO_PATH),logo_w, logo_h),NULL,background,&(SDL_Rect){logo_rect.x = game->width*1/20 ,game->height*12/20  +100, logo_w , logo_h});
+    SDL_BlitSurface(scaleSurface(IMG_Load(LOGO2_PATH),logo_w, logo_h *5/4),NULL,background,&(SDL_Rect){logo_rect.x = game->width*1/20 ,game->height*14/20 +110  , logo_w , logo_h });
 
 
     // if you need to make stuff move around make your own struct and update thier posistion with a function

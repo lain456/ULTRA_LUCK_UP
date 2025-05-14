@@ -15,14 +15,13 @@ void initPlayer(Player *player) {
     player->rect.y = HEIGHT - SQUARE_SIZE - 100;
     player->rect.w = SQUARE_SIZE;
     player->rect.h = SQUARE_SIZE;
-    // Hitbox: smaller and offset like buttons
     player->h_rect.x = player->rect.x + (SQUARE_SIZE / 1000);
     player->h_rect.y = player->rect.y + (SQUARE_SIZE / 3);
     player->h_rect.w = SQUARE_SIZE - (SQUARE_SIZE / 7);
     player->h_rect.h = SQUARE_SIZE - (SQUARE_SIZE * 20 / 48);
     player->x_speed = 0;
     player->y_speed = 0;
-    player->y_accel = 0.2; // Lighter gravity
+    player->y_accel = 0.2;
     player->moveLeft = 0;
     player->moveRight = 0;
     player->jump = 0;
@@ -30,58 +29,504 @@ void initPlayer(Player *player) {
     player->move = 1;
     player->surface = NULL;
     player->index = 0;
-    player->cycle = 7; // 7 frames
+    player->cycle = 7;
     player->jump_count = 0;
-    player->max_jumps = 2; // Allow double jump
+    player->max_jumps = 2;
     for (int i = 0; i < 7; i++) {
         player->flying_to_the_right[i] = NULL;
         player->flying_to_the_left[i] = NULL;
+        player->p_flying_to_the_right[i] = NULL;
+        player->p_flying_to_the_left[i] = NULL;
     }
 
     printf("Player initialized: rect=(x=%d, y=%d, w=%d, h=%d), h_rect=(x=%d, y=%d, w=%d, h=%d), jump_count=%d\n",
            player->rect.x, player->rect.y, player->rect.w, player->rect.h,
            player->h_rect.x, player->h_rect.y, player->h_rect.w, player->h_rect.h, player->jump_count);
 
-    // Load animation sprites
-    printf("Loading player animation sprites\n");
-    player->flying_to_the_right[0] = scaleSurface(IMG_Load(BIRD_R01_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_right[0]) printf("Error: Failed to load %s: %s\n", BIRD_R01_PATH, IMG_GetError());
-    player->flying_to_the_right[1] = scaleSurface(IMG_Load(BIRD_R02_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_right[1]) printf("Error: Failed to load %s: %s\n", BIRD_R02_PATH, IMG_GetError());
-    player->flying_to_the_right[2] = scaleSurface(IMG_Load(BIRD_R03_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_right[2]) printf("Error: Failed to load %s: %s\n", BIRD_R03_PATH, IMG_GetError());
-    player->flying_to_the_right[3] = scaleSurface(IMG_Load(BIRD_R04_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_right[3]) printf("Error: Failed to load %s: %s\n", BIRD_R04_PATH, IMG_GetError());
-    player->flying_to_the_right[4] = scaleSurface(IMG_Load(BIRD_R05_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_right[4]) printf("Error: Failed to load %s: %s\n", BIRD_R05_PATH, IMG_GetError());
-    player->flying_to_the_right[5] = scaleSurface(IMG_Load(BIRD_R06_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_right[5]) printf("Error: Failed to load %s: %s\n", BIRD_R06_PATH, IMG_GetError());
-    player->flying_to_the_right[6] = scaleSurface(IMG_Load(BIRD_R07_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_right[6]) printf("Error: Failed to load %s: %s\n", BIRD_R07_PATH, IMG_GetError());
+    // Load yellow bird animation sprites
+    printf("Loading yellow bird animation sprites\n");
+    SDL_Surface *temp = IMG_Load(BIRD_R01_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_R01_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_right[0] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_right[0]) {
+        printf("Error: Failed to scale %s\n", BIRD_R01_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
 
-    player->flying_to_the_left[0] = scaleSurface(IMG_Load(BIRD_L01_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_left[0]) printf("Error: Failed to load %s: %s\n", BIRD_L01_PATH, IMG_GetError());
-    player->flying_to_the_left[1] = scaleSurface(IMG_Load(BIRD_L02_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_left[1]) printf("Error: Failed to load %s: %s\n", BIRD_L02_PATH, IMG_GetError());
-    player->flying_to_the_left[2] = scaleSurface(IMG_Load(BIRD_L03_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_left[2]) printf("Error: Failed to load %s: %s\n", BIRD_L03_PATH, IMG_GetError());
-    player->flying_to_the_left[3] = scaleSurface(IMG_Load(BIRD_L04_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_left[3]) printf("Error: Failed to load %s: %s\n", BIRD_L04_PATH, IMG_GetError());
-    player->flying_to_the_left[4] = scaleSurface(IMG_Load(BIRD_L05_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_left[4]) printf("Error: Failed to load %s: %s\n", BIRD_L05_PATH, IMG_GetError());
-    player->flying_to_the_left[5] = scaleSurface(IMG_Load(BIRD_L06_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_left[5]) printf("Error: Failed to load %s: %s\n", BIRD_L06_PATH, IMG_GetError());
-    player->flying_to_the_left[6] = scaleSurface(IMG_Load(BIRD_L07_PATH), SQUARE_SIZE, SQUARE_SIZE);
-    if (!player->flying_to_the_left[6]) printf("Error: Failed to load %s: %s\n", BIRD_L07_PATH, IMG_GetError());
+    temp = IMG_Load(BIRD_R02_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_R02_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_right[1] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_right[1]) {
+        printf("Error: Failed to scale %s\n", BIRD_R02_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
 
-    // Set initial surface
-    player->surface = player->flying_to_the_right[0] ? player->flying_to_the_right[0] : NULL;
+    temp = IMG_Load(BIRD_R03_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_R03_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_right[2] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_right[2]) {
+        printf("Error: Failed to scale %s\n", BIRD_R03_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(BIRD_R04_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_R04_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_right[3] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_right[3]) {
+        printf("Error: Failed to scale %s\n", BIRD_R04_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(BIRD_R05_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_R05_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_right[4] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_right[4]) {
+        printf("Error: Failed to scale %s\n", BIRD_R05_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(BIRD_R06_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_R06_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_right[5] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_right[5]) {
+        printf("Error: Failed to scale %s\n", BIRD_R06_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(BIRD_R07_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_R07_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_right[6] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_right[6]) {
+        printf("Error: Failed to scale %s\n", BIRD_R07_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(BIRD_L01_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_L01_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_left[0] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_left[0]) {
+        printf("Error: Failed to scale %s\n", BIRD_L01_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(BIRD_L02_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_L02_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_left[1] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_left[1]) {
+        printf("Error: Failed to scale %s\n", BIRD_L02_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(BIRD_L03_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_L03_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_left[2] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_left[2]) {
+        printf("Error: Failed to scale %s\n", BIRD_L03_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(BIRD_L04_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_L04_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_left[3] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_left[3]) {
+        printf("Error: Failed to scale %s\n", BIRD_L04_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(BIRD_L05_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_L05_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_left[4] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_left[4]) {
+        printf("Error: Failed to scale %s\n", BIRD_L05_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(BIRD_L06_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_L06_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_left[5] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_left[5]) {
+        printf("Error: Failed to scale %s\n", BIRD_L06_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(BIRD_L07_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", BIRD_L07_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->flying_to_the_left[6] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->flying_to_the_left[6]) {
+        printf("Error: Failed to scale %s\n", BIRD_L07_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    // Load purple bird animation sprites
+    printf("Loading purple bird animation sprites\n");
+    temp = IMG_Load(P_BIRD_R01_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_R01_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_right[0] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_right[0]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_R01_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(P_BIRD_R02_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_R02_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_right[1] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_right[1]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_R02_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(P_BIRD_R03_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_R03_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_right[2] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_right[2]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_R03_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(P_BIRD_R04_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_R04_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_right[3] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_right[3]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_R04_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(P_BIRD_R05_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_R05_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_right[4] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_right[4]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_R05_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(P_BIRD_R06_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_R06_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_right[5] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_right[5]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_R06_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(P_BIRD_R07_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_R07_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_right[6] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_right[6]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_R07_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(P_BIRD_L01_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_L01_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_left[0] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_left[0]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_L01_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(P_BIRD_L02_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_L02_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_left[1] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_left[1]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_L02_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(P_BIRD_L03_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_L03_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_left[2] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_left[2]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_L03_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(P_BIRD_L04_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_L04_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_left[3] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_left[3]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_L04_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(P_BIRD_L05_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_L05_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_left[4] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_left[4]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_L05_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(P_BIRD_L06_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_L06_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_left[5] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_left[5]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_L06_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    temp = IMG_Load(P_BIRD_L07_PATH);
+    if (!temp) {
+        printf("Error: Failed to load %s: %s\n", P_BIRD_L07_PATH, IMG_GetError());
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+    player->p_flying_to_the_left[6] = scaleSurface(temp, SQUARE_SIZE, SQUARE_SIZE);
+    SDL_FreeSurface(temp);
+    if (!player->p_flying_to_the_left[6]) {
+        printf("Error: Failed to scale %s\n", P_BIRD_L07_PATH);
+        player->surface = NULL;
+        printf("Sprite loading failed, using fallback red rectangle\n");
+        return;
+    }
+
+    // Set initial surface based on player_num using switch
+    switch (player->player_num) {
+        case 1: // Purple bird
+            player->surface = player->p_flying_to_the_right[0];
+            break;
+        case 0: // Yellow bird
+        default:
+            player->surface = player->flying_to_the_right[0];
+            break;
+    }
+
     if (!player->surface) {
         printf("Error: No valid sprites loaded, using fallback red rectangle\n");
-    } else {
-        printf("Player sprite loaded successfully\n");
+        return;
     }
+
+    printf("Player sprite loaded successfully (player_num=%d)\n", player->player_num);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void handlePlayerMovement(Player *player, SDL_Event e) {
     if (!player) {
@@ -222,20 +667,48 @@ void updatePlayer(Player *player, Platform *platform) {
         frame_counter = 0;
     }
 
-    // Set surface based on direction
+    // Set surface based on direction and player_num using switch
     if (player->index >= 0 && player->index < player->cycle) {
-        SDL_Surface *new_surface = (player->move == 1) ? player->flying_to_the_right[player->index] :
-                                 player->flying_to_the_left[player->index];
+        SDL_Surface *new_surface = NULL;
+        switch (player->player_num) {
+            case 1: // Purple bird
+                new_surface = (player->move == 1) ? player->p_flying_to_the_right[player->index] :
+                              player->p_flying_to_the_left[player->index];
+                break;
+            case 0: // Yellow bird
+            default: // Default to yellow for any unexpected player_num
+                new_surface = (player->move == 1) ? player->flying_to_the_right[player->index] :
+                              player->flying_to_the_left[player->index];
+                break;
+        }
         if (new_surface) {
             player->surface = new_surface;
         } else {
-            printf("Warning: Null sprite at index %d, direction %d\n", player->index, player->move);
-            player->surface = player->flying_to_the_right[0] ? player->flying_to_the_right[0] : NULL;
+            printf("Warning: Null sprite at index %d, direction %d, player_num %d\n",
+                   player->index, player->move, player->player_num);
+            switch (player->player_num) {
+                case 1:
+                    new_surface = player->p_flying_to_the_right[0];
+                    break;
+                case 0:
+                default:
+                    new_surface = player->flying_to_the_right[0];
+                    break;
+            }
+            player->surface = new_surface;
         }
     } else {
         printf("Error: Invalid animation index %d, resetting to 0\n", player->index);
         player->index = 0;
-        player->surface = player->flying_to_the_right[0] ? player->flying_to_the_right[0] : NULL;
+        switch (player->player_num) {
+            case 1:
+                player->surface = player->p_flying_to_the_right[0];
+                break;
+            case 0:
+            default:
+                player->surface = player->flying_to_the_right[0];
+                break;
+        }
     }
 }
 
@@ -253,9 +726,8 @@ void renderPlayer(SDL_Surface *screen, Player *player) {
     }
 
     // Debug: Uncomment to visualize player hitbox (red)
-
     //SDL_FillRect(screen, &player->rect, SDL_MapRGB(screen->format, 0, 255, 0));
-    //SDL_FillRect(screen, &player->h_rect, SDL_MapRGB(screen->format, 255, 0, 0));
+    SDL_FillRect(screen, &player->h_rect, SDL_MapRGB(screen->format, 255, 0, 0));
 }
 
 void freePlayer(Player *player) {
@@ -269,6 +741,14 @@ void freePlayer(Player *player) {
         if (player->flying_to_the_left[i]) {
             SDL_FreeSurface(player->flying_to_the_left[i]);
             player->flying_to_the_left[i] = NULL;
+        }
+        if (player->p_flying_to_the_right[i]) {
+            SDL_FreeSurface(player->p_flying_to_the_right[i]);
+            player->p_flying_to_the_right[i] = NULL;
+        }
+        if (player->p_flying_to_the_left[i]) {
+            SDL_FreeSurface(player->p_flying_to_the_left[i]);
+            player->p_flying_to_the_left[i] = NULL;
         }
     }
     player->surface = NULL; // Surface already freed if part of animation arrays
