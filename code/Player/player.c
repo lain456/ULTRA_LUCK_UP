@@ -30,6 +30,7 @@ void initPlayer(Player *player) {
     player->surface = NULL;
     player->index = 0;
     player->cycle = 7;
+    player->frame_counter = 0; // Initialize per-player frame counter
     player->jump_count = 0;
     player->max_jumps = 2;
     for (int i = 0; i < 7; i++) {
@@ -514,20 +515,6 @@ void initPlayer(Player *player) {
     printf("Player sprite loaded successfully (player_num=%d)\n", player->player_num);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void handlePlayerMovement(Player *player, SDL_Event e) {
     if (!player) {
         printf("Error: Player pointer is null in handlePlayerMovement\n");
@@ -538,7 +525,7 @@ void handlePlayerMovement(Player *player, SDL_Event e) {
             case SDLK_q: player->moveLeft = 1; break;
             case SDLK_d: player->moveRight = 1; break;
             case SDLK_SPACE:
-                if (!player->jump) { // Only trigger if not already jumping
+                if (!player->jump) {
                     player->jump_trigger = 1;
                     printf("Jump triggered\n");
                 }
@@ -566,7 +553,6 @@ void checkPlatformCollision(Player *player, Platform *platform) {
                     player->h_rect.y + player->h_rect.h > platform->h_rect.y);
 
     if (collision) {
-        // Landing from above
         if (player->y_speed >= 0 && player->h_rect.y + player->h_rect.h <= platform->h_rect.y + 10) {
             player->rect.y = platform->h_rect.y - player->h_rect.h - (player->h_rect.y - player->rect.y);
             player->h_rect.y = platform->h_rect.y - player->h_rect.h;
@@ -576,34 +562,28 @@ void checkPlatformCollision(Player *player, Platform *platform) {
             printf("Landed on platform, jump_count reset to %d, rect.y=%d, h_rect.y=%d\n",
                    player->jump_count, player->rect.y, player->h_rect.y);
         }
-    } else {
-        player->y_accel = 0.2; // Lighter gravity
     }
 }
 
-void updatePlayer(Player *player, Platform *platform) {
-    if (!player) {
-        printf("Error: Player pointer is null in updatePlayer\n");
+void updatePlayer(Game *game, Player *player) {
+    if (!game || !player) {
+        printf("Error: Invalid game or player pointer in updatePlayer\n");
         return;
     }
 
-    static int is_grounded = 0;
-    static int frame_counter = 0; // For animation timing
-
-    is_grounded = (player->rect.y >= HEIGHT - SQUARE_SIZE && player->y_speed == 0) ||
-                  (player->y_accel == 0 && player->y_speed == 0);
+    int is_grounded = (player->rect.y >= HEIGHT - SQUARE_SIZE && player->y_speed == 0) ||
+                      (player->y_accel == 0 && player->y_speed == 0);
 
     // Handle jump
     if (player->jump_trigger && player->jump_count < player->max_jumps) {
-        player->y_speed = -12; // Stronger jump
-        player->y_accel = 0.2; // Lighter gravity
+        player->y_speed = -12;
+        player->y_accel = 0.2;
         player->jump_count++;
-        player->jump_trigger = 0; // Consume trigger
+        player->jump_trigger = 0;
         is_grounded = 0;
         printf("Jump %d performed, jump_count=%d, y_speed=%.2f\n", player->jump_count, player->jump_count, player->y_speed);
     }
 
-    // Reset jump count when grounded
     if (is_grounded) {
         player->jump_count = 0;
         printf("Grounded, jump_count reset to %d\n", player->jump_count);
@@ -618,15 +598,14 @@ void updatePlayer(Player *player, Platform *platform) {
     if (player->moveLeft) player->move = -1;
     if (player->moveRight) player->move = 1;
 
-    // Apply gravity
+    // Gravity
     player->y_speed += player->y_accel;
-    if (player->y_speed > 12) player->y_speed = 12; // Adjusted cap
+    if (player->y_speed > 12) player->y_speed = 12;
     if (player->y_speed < -12) player->y_speed = -12;
 
     // Update position
     player->rect.x += player->x_speed;
     player->rect.y += player->y_speed;
-    // Update hitbox position with offset
     player->h_rect.x = player->rect.x + (player->rect.w / 18);
     player->h_rect.y = player->rect.y + (player->rect.h / 4);
 
@@ -657,17 +636,20 @@ void updatePlayer(Player *player, Platform *platform) {
                player->jump_count, player->rect.y, player->h_rect.y);
     }
 
-    // Check platform collision
-    checkPlatformCollision(player, platform);
-
-    // Update animation (every ~4 frames for ~15 FPS at 60 FPS)
-    frame_counter++;
-    if (frame_counter >= 4) {
-        player->index = (player->index + 1) % player->cycle;
-        frame_counter = 0;
+    // Check platform collisions
+    player->y_accel = 0.2;
+    for (int i = 0; i < game->platform_count; i++) {
+        checkPlatformCollision(player, &game->platforms[i]);
     }
 
-    // Set surface based on direction and player_num using switch
+    // Update animation
+    player->frame_counter++;
+    if (player->frame_counter >= 4) {
+        player->index = (player->index + 1) % player->cycle;
+        player->frame_counter = 0;
+    }
+
+    // Set surface based on direction and player_num
     if (player->index >= 0 && player->index < player->cycle) {
         SDL_Surface *new_surface = NULL;
         switch (player->player_num) {
@@ -676,7 +658,7 @@ void updatePlayer(Player *player, Platform *platform) {
                               player->p_flying_to_the_left[player->index];
                 break;
             case 0: // Yellow bird
-            default: // Default to yellow for any unexpected player_num
+            default:
                 new_surface = (player->move == 1) ? player->flying_to_the_right[player->index] :
                               player->flying_to_the_left[player->index];
                 break;
@@ -721,13 +703,8 @@ void renderPlayer(SDL_Surface *screen, Player *player) {
     if (player->surface) {
         SDL_BlitSurface(player->surface, NULL, screen, &player->rect);
     } else {
-        // Fallback: red rectangle
         SDL_FillRect(screen, &player->rect, SDL_MapRGB(screen->format, 255, 0, 0));
     }
-
-    // Debug: Uncomment to visualize player hitbox (red)
-    //SDL_FillRect(screen, &player->rect, SDL_MapRGB(screen->format, 0, 255, 0));
-    //SDL_FillRect(screen, &player->h_rect, SDL_MapRGB(screen->format, 255, 0, 0));
 }
 
 void freePlayer(Player *player) {
@@ -751,5 +728,6 @@ void freePlayer(Player *player) {
             player->p_flying_to_the_left[i] = NULL;
         }
     }
-    player->surface = NULL; // Surface already freed if part of animation arrays
+    player->surface = NULL;
 }
+

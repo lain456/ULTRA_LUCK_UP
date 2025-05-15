@@ -68,6 +68,8 @@
 
 #define LOGO_PATH "../assets/graphics/menu/main_logo.png"
 #define LOGO2_PATH "../assets/graphics/menu/txt_logo.png"
+#define JOJO_PATH "../assets/graphics/basic/jojo.png"
+
 
 #define MUSIC_PATH "../assets/audio/music.mp3"
 #define HOVER_SFX_PATH "../assets/audio/hover.wav"
@@ -112,19 +114,17 @@ typedef struct {
     int isHovered;
     int isPressed;
     int isClicked;
-    int isSelected;                 // True if the button is selected
+    int isSelected;
 }Button;
 
 typedef struct {
-    // to be developed
     SDL_Surface *bg;
     SDL_Color color;
     SDL_Surface *fill;
     Button *button;
-    SDL_Rect rect; // for the bg
-    SDL_Rect s_rect;  // for the fill
-    int val; // % ratio
-    // button
+    SDL_Rect rect;
+    SDL_Rect s_rect;
+    int val;
     SDL_Surface *b;
     SDL_Surface *bh;
     int b_size;
@@ -135,10 +135,44 @@ typedef struct {
     int x_dif;
 } Slider;
 
+
+
+
+
+
+
+
+
+
+// please i wanna add input handeling to my menus
+
+
 typedef struct {
-    // menu elements :
+    SDL_Rect rect;          // Input box rectangle
+    Text txt;               // Text displayed inside
+    int is_active;          // Whether the input box is active for typing
+    char value[256];        // Stored text value
+    int max_length;         // Maximum length of input
+    int is_hovered;         // Hover state
+    SDL_Surface *not_hovered; // Surface when not hovered
+    SDL_Surface *hovered;     // Surface when hovered
+    SDL_Surface *active;      // Surface when active
+} Input_box;
+
+
+
+
+
+
+
+
+
+
+
+
+typedef struct {
     Button *buttonlist;
-    int selected_index;             // Index of the currently selected button
+    int selected_index;
     int b_ct;
     Text *txtlist;
     int txt_ct;
@@ -146,9 +180,10 @@ typedef struct {
     int t_margine,b_margine;
     Slider *slider_list;
     int s_ct,s_margine;
+    int i_ct;
+    Input_box *input_list;
 }Menu;
 
-// creating nodes for our tree
 typedef struct M_node {
     struct M_node *back;
     Menu *menu;
@@ -168,53 +203,53 @@ typedef struct {
 }Input;
 
 typedef struct {
+    SDL_Rect rect;
+    SDL_Rect h_rect;
+} Platform;
+
+typedef struct {
     //movements
     int x, y;
     float x_speed, y_speed;
     float x_accel, y_accel;
     //stats
     int health;
-    int level; // Add level attribute
+    int level;
     // direction
     int move;
     int jump;
     int dash;
     int attack;
-    int moveLeft,moveRight,moveUp,moveDown;
-    // animation spritesheet WIP
+    int moveLeft, moveRight, moveUp, moveDown;
+    // animation spritesheet
     SDL_Rect rect;
     SDL_Rect h_rect;
     SDL_Surface *surface;
-    SDL_Surface * flying_to_the_right[8];
-    SDL_Surface * flying_to_the_left[8];
+    SDL_Surface *flying_to_the_right[8];
+    SDL_Surface *flying_to_the_left[8];
     // second player sprite sheet
-    SDL_Surface * p_flying_to_the_right[8];
-    SDL_Surface * p_flying_to_the_left[8];
+    SDL_Surface *p_flying_to_the_right[8];
+    SDL_Surface *p_flying_to_the_left[8];
+    int frame_counter;
     int index;
     int cycle;
-    // fight animation WIP
+    // fight animation
     int player_num;
-    // input ...crap to make customizable
+    // input
     Input input;
-    int jump_count;       // Number of jumps performed
+    int jump_count;
     int max_jumps;
     int jump_trigger;
 } Player;
 
-// Platform structure
 typedef struct {
-    SDL_Rect rect; // Position and size
-    SDL_Rect h_rect;
-} Platform;
-
-typedef struct {
-    int multiplayer; // 0/1 condition
-    int serial_fd;                  // File descriptor for serial port
-    char serial_buffer[256];        // Buffer for serial data
-    int serial_buffer_len;          // Length of data in buffer
-    Uint32 last_nav_time;           // Time of last navigation
-    ArduinoStatus arduino_status;   // Current Arduino state
-    ArduinoStatus prev_arduino_status; // Previous Arduino state for edge detection
+    int multiplayer;
+    int serial_fd;
+    char serial_buffer[256];
+    int serial_buffer_len;
+    Uint32 last_nav_time;
+    ArduinoStatus arduino_status;
+    ArduinoStatus prev_arduino_status;
     SDL_Event event;
     char *title;
     int width;
@@ -225,61 +260,53 @@ typedef struct {
     int state;
     int quite;
     Player *player;
-    Player *player2; // Added for future 2-player mode
+    Player *player2;
     TTF_Font *mini_font;
     TTF_Font *main_font;
     TTF_Font *mid_font;
     TTF_Font *big_main_font;
-    // mouse and button stuff
     int x_mouse,y_mouse,x_button_size,y_button_size,margin;
     int released_mouse;
     int mouse_pressed;
     SDL_Surface *b_yellow;
     SDL_Surface *b_purple;
-    //slider stuff
     int x_slider_size,y_slider_size;
     SDL_Color slider_fill_color;
     SDL_Color slider_bg_color;
     SDL_Surface *slider_bg, *slider_fill, *b_slider;
-    //often used surfaces will be here :
-    // background
     SDL_Surface *background;
     SDL_Surface *black_surface;
     SDL_Surface *logo;
-    // the real deal ...
     Menu *current_menu;
     M_node *current_node;
     int escape;
-    // audio stuff
-    Mix_Chunk *sfx; //single sfx wav format
-    Mix_Music *music; // to listen to your bad taste in music
+    Mix_Chunk *sfx;
+    Mix_Music *music;
     int music_volume;
     int sfx_volume;
-    //animation
     int frame;
     int cycle;
     int fps;
-    int current_frame;  // this number cycles each time it reaches the fps ( it goes from one to 60 if fps is 60)
+    int current_frame;
     time_t current_time;
-    // Time fields
-    time_t last_time_update; // Last time the time string was updated
-    char time_string[32];   // Buffer for formatted time (HH:MM:SS)
-    // FPS fields
-    Uint32 last_fps_update; // Last time FPS was calculated (SDL ticks)
-    int frame_count;        // Number of frames since last FPS update
+    time_t last_time_update;
+    char time_string[32];
+    Uint32 last_fps_update;
+    int frame_count;
     float current_fps;
-    int selected_button_index;      // Index of the currently selected button
-    Uint32 last_joystick_nav;       // Time of last joystick navigation (for cooldown)
-    int joystick_nav_cooldown;      // Cooldown in ms for joystick navigation
-    // FPS control
+    int selected_button_index;
+    Uint32 last_joystick_nav;
+    int joystick_nav_cooldown;
     Uint32 last_frame_time;
-    int select;                     // Flag to indicate joystick selection
-    int controller_active;          // Flag to indicate if controller navigation is active
-    Uint32 last_mouse_motion;       // Time of last mouse motion event
-
+    int select;
+    int controller_active;
+    Uint32 last_mouse_motion;
+    Platform *platforms;
+    int platform_count;
 }Game;
 
 int gameplay(Game *game);
 int pizza();
+void handlePlayer2Movement(Player *player, SDL_Event e);
 
 #endif //GAME_H

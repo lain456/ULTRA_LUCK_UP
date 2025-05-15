@@ -118,3 +118,23 @@ void toggle_fullscreen(Game *game) {
 
     SDL_Flip(game->screen);
 }
+
+
+
+void draw_rect(SDL_Surface *surface, int x, int y, int w, int h, Uint8 r, Uint8 g, Uint8 b) {
+    if (!surface) {
+        printf("Error: NULL surface in draw_rect\n");
+        return;
+    }
+
+    Uint32 color = SDL_MapRGB(surface->format, r, g, b);
+
+    // Draw top line
+    SDL_FillRect(surface, &(SDL_Rect){x, y, w, 1}, color);
+    // Draw bottom line
+    SDL_FillRect(surface, &(SDL_Rect){x, y + h - 1, w, 1}, color);
+    // Draw left line
+    SDL_FillRect(surface, &(SDL_Rect){x, y, 1, h}, color);
+    // Draw right line
+    SDL_FillRect(surface, &(SDL_Rect){x + w - 1, y, 1, h}, color);
+}
