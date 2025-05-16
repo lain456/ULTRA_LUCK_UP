@@ -1,0 +1,9 @@
+<map id="Puzzle" name="Puzzle">
+<area shape="rect" id="Node000001" title=" " alt="" coords="61,181,125,207"/>
+<area shape="rect" id="Node000002" href="$structPuzzlePiece.html" title=" " alt="" coords="5,93,104,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,131,73,156,87,180,83,183,68,158,59,133"/>
+<area shape="rect" id="Node000003" href="$structButton.html" title=" " alt="" coords="129,93,194,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="146,131,105,182,101,179,141,128"/>
+<area shape="rect" id="Node000004" href="$structText.html" title=" " alt="" coords="137,5,186,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="164,45,164,93,159,93,159,45"/>
+</map>
