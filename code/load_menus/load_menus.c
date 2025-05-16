@@ -6,24 +6,20 @@
 #include "../slider/slider.h"
 #include "../input/input.h"
 
-Menu play_menu(Game game){
+Menu play_menu(Game game) {
     Menu play;
     Init_Menu(&play);
 
-    // custom play_menu
     play.b_ct = 5;
     play.txt_ct = 3;
     play.t_margine = 10;
     play.b_margine = 10;
 
-    // mem alloc
     play.buttonlist = (Button *)malloc(sizeof(Button) * play.b_ct);
     play.txtlist = (Text *)malloc(sizeof(Text) * play.txt_ct);
 
-    // Button names and texts
     char *button_strings[] = {"play", "options", "enigme", "quit", "help"};
-    for (int i = 0; i < play.b_ct; i++)
-    {
+    for (int i = 0; i < play.b_ct; i++) {
         play.buttonlist[i] = *create_button(&game, (WIDTH - game.x_button_size) / 2, 300, game.y_button_size, game.x_button_size, button_strings[i], WHITE, 1);
     }
 
@@ -37,12 +33,10 @@ Menu play_menu(Game game){
     return play;
 }
 
-Menu exit_menu(Game game)
-{
+Menu exit_menu(Game game) {
     Menu new_menu;
     Init_Menu(&new_menu);
 
-    // custom menu (general)
     new_menu.b_ct = 2;
     new_menu.txt_ct = 1;
     new_menu.t_margine = 10;
@@ -52,8 +46,7 @@ Menu exit_menu(Game game)
     new_menu.buttonlist = (Button *)malloc(sizeof(Button) * new_menu.b_ct);
     new_menu.txtlist = (Text *)malloc(sizeof(Text) * new_menu.txt_ct);
 
-    for (int i = 0; i < new_menu.b_ct; i++)
-    {
+    for (int i = 0; i < new_menu.b_ct; i++) {
         new_menu.buttonlist[i] = *create_button(&game, (WIDTH - game.x_button_size) * 5 / 20, (HEIGHT - game.y_button_size) * 3 / 4, game.y_button_size, game.x_button_size, button_strings[i], WHITE, 1);
     }
 
@@ -64,12 +57,10 @@ Menu exit_menu(Game game)
     return new_menu;
 }
 
-Menu options_menu(Game game)
-{
+Menu options_menu(Game game) {
     Menu new_menu;
     Init_Menu(&new_menu);
 
-    // custom menu (general)
     new_menu.b_ct = 4;
     new_menu.txt_ct = 1;
     new_menu.s_ct = 2;
@@ -82,8 +73,7 @@ Menu options_menu(Game game)
     new_menu.txtlist = (Text *)malloc(sizeof(Text) * new_menu.txt_ct);
     new_menu.slider_list = (Slider *)malloc(sizeof(Slider) * new_menu.s_ct);
 
-    for (int i = 0; i < new_menu.b_ct; i++)
-    {
+    for (int i = 0; i < new_menu.b_ct; i++) {
         new_menu.buttonlist[i] = *create_button(&game, (WIDTH - game.x_button_size) * 12 / 32, (HEIGHT - game.y_button_size) * 13 / 32, game.y_button_size, game.x_button_size, button_strings[i], WHITE, 1);
     }
 
@@ -98,13 +88,11 @@ Menu options_menu(Game game)
     return new_menu;
 }
 
-Menu WIP_menu(Game game)
-{
+Menu WIP_menu(Game game) {
     Menu new_menu;
     Init_Menu(&new_menu);
     new_menu.background = create_color_surface(game.width, game.height, 0, 0, 0);
 
-    // custom menu (general)
     new_menu.b_ct = 1;
     new_menu.txt_ct = 1;
     new_menu.t_margine = 10;
@@ -114,8 +102,7 @@ Menu WIP_menu(Game game)
     new_menu.buttonlist = (Button *)malloc(sizeof(Button) * new_menu.b_ct);
     new_menu.txtlist = (Text *)malloc(sizeof(Text) * new_menu.txt_ct);
 
-    for (int i = 0; i < new_menu.b_ct; i++)
-    {
+    for (int i = 0; i < new_menu.b_ct; i++) {
         new_menu.buttonlist[i] = *create_button(&game, (WIDTH - game.x_button_size) * 10 / 20, (HEIGHT - game.y_button_size) * 3 / 4, game.y_button_size, game.x_button_size, button_strings[i], WHITE, 1);
     }
 
@@ -124,12 +111,10 @@ Menu WIP_menu(Game game)
     return new_menu;
 }
 
-Menu player_choice_menu(Game game)
-{
+Menu player_choice_menu(Game game) {
     Menu new_menu;
     Init_Menu(&new_menu);
 
-    // custom menu (general)
     new_menu.b_ct = 2;
     new_menu.txt_ct = 1;
     new_menu.t_margine = 10;
@@ -139,8 +124,7 @@ Menu player_choice_menu(Game game)
     new_menu.buttonlist = (Button *)malloc(sizeof(Button) * new_menu.b_ct);
     new_menu.txtlist = (Text *)malloc(sizeof(Text) * new_menu.txt_ct);
 
-    for (int i = 0; i < new_menu.b_ct; i++)
-    {
+    for (int i = 0; i < new_menu.b_ct; i++) {
         new_menu.buttonlist[i] = *create_button(&game, (WIDTH - game.x_button_size) * 5 / 20, (HEIGHT - game.y_button_size) * 3 / 4, game.y_button_size, game.x_button_size, button_strings[i], WHITE, 1);
     }
 
@@ -151,12 +135,10 @@ Menu player_choice_menu(Game game)
     return new_menu;
 }
 
-Menu multiplayer_menu(Game game)
-{
+Menu multiplayer_menu(Game game) {
     Menu new_menu;
     Init_Menu(&new_menu);
 
-    // custom menu (general)
     new_menu.b_ct = 2;
     new_menu.txt_ct = 1;
     new_menu.t_margine = 10;
@@ -166,8 +148,7 @@ Menu multiplayer_menu(Game game)
     new_menu.buttonlist = (Button *)malloc(sizeof(Button) * new_menu.b_ct);
     new_menu.txtlist = (Text *)malloc(sizeof(Text) * new_menu.txt_ct);
 
-    for (int i = 0; i < new_menu.b_ct; i++)
-    {
+    for (int i = 0; i < new_menu.b_ct; i++) {
         new_menu.buttonlist[i] = *create_button(&game, (WIDTH - game.x_button_size) * 5 / 20, (HEIGHT - game.y_button_size) * 3 / 4, game.y_button_size, game.x_button_size, button_strings[i], GOLD, 1);
     }
 
@@ -178,32 +159,50 @@ Menu multiplayer_menu(Game game)
     return new_menu;
 }
 
-Menu help_menu(Game game)
-{
+Menu help_menu(Game game) {
     Menu new_menu;
     Init_Menu(&new_menu);
 
-    // custom menu (general)
     new_menu.b_ct = 1;
     new_menu.txt_ct = 1;
     new_menu.i_ct = 1;
     new_menu.t_margine = 10;
     new_menu.b_margine = 25;
 
-    // allocate memory
     new_menu.buttonlist = (Button *)malloc(sizeof(Button) * new_menu.b_ct);
     new_menu.txtlist = (Text *)malloc(sizeof(Text) * new_menu.txt_ct);
     new_menu.input_list = (Input_box *)malloc(sizeof(Input_box) * new_menu.i_ct);
 
-    // create button
     char *button_strings[] = {"return"};
     new_menu.buttonlist[0] = *create_button(&game, (WIDTH - game.x_button_size) * 10 / 20, (HEIGHT - game.y_button_size) * 3 / 4, game.y_button_size, game.x_button_size, button_strings[0], WHITE, 1);
 
-    // create text
     new_menu.txtlist[0] = *create_txt("Enter your name:", game.big_main_font, BLACK, WIDTH * 1 / 5, HEIGHT * 2 / 5);
 
-    // create input box
     new_menu.input_list[0] = *create_input_box(&game, (WIDTH - game.x_button_size) / 2, HEIGHT / 2, game.x_button_size, game.y_button_size, "", WHITE, 20);
+
+    return new_menu;
+}
+
+Menu difficulty_menu(Game game) {
+    Menu new_menu;
+    Init_Menu(&new_menu);
+
+    new_menu.b_ct = 4;
+    new_menu.txt_ct = 1;
+    new_menu.t_margine = 10;
+    new_menu.b_margine = 25;
+    char *button_strings[] = {"Easy (2x2)", "Medium (4x4)", "Hard (16x16)", "Return"};
+
+    new_menu.buttonlist = (Button *)malloc(sizeof(Button) * new_menu.b_ct);
+    new_menu.txtlist = (Text *)malloc(sizeof(Text) * new_menu.txt_ct);
+
+    for (int i = 0; i < new_menu.b_ct; i++) {
+        new_menu.buttonlist[i] = *create_button(&game, (WIDTH - game.x_button_size) / 2, (HEIGHT - game.y_button_size) * 13 / 32, game.y_button_size, game.x_button_size, button_strings[i], WHITE, 1);
+    }
+
+    y_order_buttons(new_menu.buttonlist, new_menu.b_margine, new_menu.b_ct);
+
+    new_menu.txtlist[0] = *create_txt("Select Puzzle Difficulty", game.big_main_font, BLACK, WIDTH * 2 / 5, HEIGHT * 1 / 5);
 
     return new_menu;
 }

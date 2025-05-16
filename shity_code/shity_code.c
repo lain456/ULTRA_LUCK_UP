@@ -5,7 +5,6 @@
 #include "button/button.h"
 #include "tools/tools.h"
 
-#define PUZZLE_GRID_SIZE 3
 #define TABLE_X 850
 #define TABLE_Y 100
 #define TABLE_WIDTH 200
@@ -20,12 +19,9 @@
 static SDL_Surface* crop_to_square(SDL_Surface *src) {
     if (!src) return NULL;
 
-    // Find the smaller dimension
     int size = src->w < src->h ? src->w : src->h;
-    // Adjust to be divisible by 3
     size -= size % 3;
 
-    // Create new square surface
     SDL_Surface *cropped = SDL_CreateRGBSurface(
         0, size, size, src->format->BitsPerPixel,
         src->format->Rmask, src->format->Gmask, src->format->Bmask, src->format->Amask
@@ -35,7 +31,6 @@ static SDL_Surface* crop_to_square(SDL_Surface *src) {
         return NULL;
     }
 
-    // Center the crop
     SDL_Rect src_rect = {
         (src->w - size) / 2,
         (src->h - size) / 2,
@@ -45,7 +40,19 @@ static SDL_Surface* crop_to_square(SDL_Surface *src) {
     return cropped;
 }
 
-static void init_puzzle(Game *game, Puzzle *puzzle) {
+static void init_puzzle(Game *game, Puzzle *puzzle, PuzzleDifficulty difficulty) {
+    puzzle->difficulty = difficulty;
+    puzzle->grid_size = difficulty; // Grid size matches difficulty (2, 4, or 16)
+    puzzle->piece_count = puzzle->grid_size * puzzle->grid_size;
+
+    // Allocate pieces array
+    puzzle->pieces = malloc(sizeof(PuzzlePiece) * puzzle->piece_count);
+    if (!puzzle->pieces) {
+        printf("Error: Failed to allocate puzzle pieces\n");
+        game->state = 1;
+        return;
+    }
+
     // Create pink background
     puzzle->background = SDL_CreateRGBSurface(0, WIDTH, HEIGHT, 32, 0, 0, 0, 0);
     if (!puzzle->background) {
@@ -79,25 +86,22 @@ static void init_puzzle(Game *game, Puzzle *puzzle) {
         return;
     }
 
-    int PIECE_SIZE = puzzle->image->w / 3;
-    int PUZZLE_X = (WIDTH - PIECE_SIZE * PUZZLE_GRID_SIZE) / 2;
+    int PIECE_SIZE = puzzle->image->w / puzzle->grid_size;
+    int PUZZLE_X = (WIDTH - PIECE_SIZE * puzzle->grid_size) / 2;
     int PUZZLE_Y = 120;
 
     // Initialize pieces
-    for (int i = 0; i < 9; i++) {
-        int row = i / PUZZLE_GRID_SIZE;
-        int col = i % PUZZLE_GRID_SIZE;
+    for (int i = 0; i < puzzle->piece_count; i++) {
+        int row = i / puzzle->grid_size;
+        int col = i % puzzle->grid_size;
 
-        // Source rectangle in the scaled image
         puzzle->pieces[i].src_rect = (SDL_Rect){
             col * PIECE_SIZE, row * PIECE_SIZE, PIECE_SIZE, PIECE_SIZE
         };
 
-        // Correct position
         puzzle->pieces[i].correct_x = PUZZLE_X + col * PIECE_SIZE;
         puzzle->pieces[i].correct_y = PUZZLE_Y + row * PIECE_SIZE;
 
-        // Initial position (random in scramble table)
         puzzle->pieces[i].dest_rect = (SDL_Rect){
             SCRAMBLE_TABLE_X + (rand() % (SCRAMBLE_TABLE_WIDTH - PIECE_SIZE)),
             SCRAMBLE_TABLE_Y + (rand() % (SCRAMBLE_TABLE_HEIGHT - PIECE_SIZE)),
@@ -121,11 +125,9 @@ static void init_puzzle(Game *game, Puzzle *puzzle) {
 
     puzzle->is_solved = 0;
 
-    // Initialize tables
     puzzle->table_rect = (SDL_Rect){TABLE_X, TABLE_Y, TABLE_WIDTH, TABLE_HEIGHT};
     puzzle->scramble_table_rect = (SDL_Rect){SCRAMBLE_TABLE_X, SCRAMBLE_TABLE_Y, SCRAMBLE_TABLE_WIDTH, SCRAMBLE_TABLE_HEIGHT};
 
-    // Initialize reference image
     puzzle->reference_image = scaleSurface(puzzle->image, REFERENCE_SIZE, REFERENCE_SIZE);
     if (!puzzle->reference_image) {
         printf("Error: Failed to create reference image: %s\n", SDL_GetError());
@@ -133,7 +135,6 @@ static void init_puzzle(Game *game, Puzzle *puzzle) {
         return;
     }
 
-    // Create return button (positioned below holding table)
     puzzle->return_button = create_button(game,
         TABLE_X + (TABLE_WIDTH - game->x_button_size) / 2,
         TABLE_Y + TABLE_HEIGHT + 20,
@@ -145,11 +146,15 @@ static void init_puzzle(Game *game, Puzzle *puzzle) {
 }
 
 static void free_puzzle(Puzzle *puzzle) {
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < puzzle->piece_count; i++) {
         if (puzzle->pieces[i].piece) {
             SDL_FreeSurface(puzzle->pieces[i].piece);
             puzzle->pieces[i].piece = NULL;
         }
+    }
+    if (puzzle->pieces) {
+        free(puzzle->pieces);
+        puzzle->pieces = NULL;
     }
     if (puzzle->background) {
         SDL_FreeSurface(puzzle->background);
@@ -186,6 +191,28 @@ static int is_in_scramble_table(Game *game, Puzzle *puzzle) {
             game->y_mouse < puzzle->scramble_table_rect.y + puzzle->scramble_table_rect.h);
 }
 
+SDL_Rect get_hovered_grid_spot(Game *game, Puzzle *puzzle) {
+    int PIECE_SIZE = puzzle->image->w / puzzle->grid_size;
+    int PUZZLE_X = (WIDTH - PIECE_SIZE * puzzle->grid_size) / 2;
+    int PUZZLE_Y = 120;
+
+    int grid_x = (game->x_mouse - PUZZLE_X) / PIECE_SIZE;
+    int grid_y = (game->y_mouse - PUZZLE_Y) / PIECE_SIZE;
+
+    // Check if within grid bounds
+    if (grid_x >= 0 && grid_x < puzzle->grid_size && grid_y >= 0 && grid_y < puzzle->grid_size) {
+        return (SDL_Rect){
+            PUZZLE_X + grid_x * PIECE_SIZE,
+            PUZZLE_Y + grid_y * PIECE_SIZE,
+            PIECE_SIZE,
+            PIECE_SIZE
+        };
+    }
+
+    // Return an invalid rect if not hovering over grid
+    return (SDL_Rect){-1, -1, 0, 0};
+}
+
 static void handle_puzzle_input(Game *game, Puzzle *puzzle) {
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
@@ -201,11 +228,14 @@ static void handle_puzzle_input(Game *game, Puzzle *puzzle) {
             case SDL_MOUSEBUTTONDOWN:
                 if (e.button.button == SDL_BUTTON_LEFT) {
                     game->mouse_pressed = 1;
-                    for (int i = 8; i >= 0; i--) { // Topmost piece
-                        // HITBOX: Checks if mouse (x_mouse, y_mouse) is within piece's dest_rect (x, y, PIECE_SIZE, PIECE_SIZE)
-                        if (is_hovered(game, &puzzle->pieces[i].dest_rect)) {
-                            puzzle->pieces[i].is_dragging = 1;
-                            break;
+                    if (puzzle->return_button && is_hovered(game, &puzzle->return_button->b_rect)) {
+                        puzzle->return_button->isClicked = 1;
+                    } else {
+                        for (int i = puzzle->piece_count - 1; i >= 0; i--) {
+                            if (is_hovered(game, &puzzle->pieces[i].dest_rect)) {
+                                puzzle->pieces[i].is_dragging = 1;
+                                break;
+                            }
                         }
                     }
                 }
@@ -214,18 +244,15 @@ static void handle_puzzle_input(Game *game, Puzzle *puzzle) {
                 if (e.button.button == SDL_BUTTON_LEFT) {
                     game->released_mouse = 1;
                     game->mouse_pressed = 0;
-                    for (int i = 0; i < 9; i++) {
+                    for (int i = 0; i < puzzle->piece_count; i++) {
                         if (puzzle->pieces[i].is_dragging) {
                             puzzle->pieces[i].is_dragging = 0;
-                            int PIECE_SIZE = puzzle->image->w / 3;
-                            int PUZZLE_X = (WIDTH - PIECE_SIZE * PUZZLE_GRID_SIZE) / 2;
+                            int PIECE_SIZE = puzzle->image->w / puzzle->grid_size;
+                            int PUZZLE_X = (WIDTH - PIECE_SIZE * puzzle->grid_size) / 2;
                             int PUZZLE_Y = 120;
-                            // Check placement
                             if (is_in_scramble_table(game, puzzle)) {
-                                // Place freely in scramble table
                                 puzzle->pieces[i].dest_rect.x = game->x_mouse - PIECE_SIZE / 2;
                                 puzzle->pieces[i].dest_rect.y = game->y_mouse - PIECE_SIZE / 2;
-                                // Clamp to scramble table bounds
                                 if (puzzle->pieces[i].dest_rect.x < puzzle->scramble_table_rect.x)
                                     puzzle->pieces[i].dest_rect.x = puzzle->scramble_table_rect.x;
                                 if (puzzle->pieces[i].dest_rect.y < puzzle->scramble_table_rect.y)
@@ -233,12 +260,10 @@ static void handle_puzzle_input(Game *game, Puzzle *puzzle) {
                                 if (puzzle->pieces[i].dest_rect.x + PIECE_SIZE > puzzle->scramble_table_rect.x + puzzle->scramble_table_rect.w)
                                     puzzle->pieces[i].dest_rect.x = puzzle->scramble_table_rect.x + puzzle->scramble_table_rect.w - PIECE_SIZE;
                                 if (puzzle->pieces[i].dest_rect.y + PIECE_SIZE > puzzle->scramble_table_rect.y + puzzle->scramble_table_rect.h)
-                                puzzle->pieces[i].dest_rect.y = puzzle->scramble_table_rect.y + puzzle->scramble_table_rect.h - PIECE_SIZE;
+                                    puzzle->pieces[i].dest_rect.y = puzzle->scramble_table_rect.y + puzzle->scramble_table_rect.h - PIECE_SIZE;
                             } else if (is_in_table(game, puzzle)) {
-                                // Place freely in holding table
                                 puzzle->pieces[i].dest_rect.x = game->x_mouse - PIECE_SIZE / 2;
                                 puzzle->pieces[i].dest_rect.y = game->y_mouse - PIECE_SIZE / 2;
-                                // Clamp to holding table bounds
                                 if (puzzle->pieces[i].dest_rect.x < puzzle->table_rect.x)
                                     puzzle->pieces[i].dest_rect.x = puzzle->table_rect.x;
                                 if (puzzle->pieces[i].dest_rect.y < puzzle->table_rect.y)
@@ -246,52 +271,49 @@ static void handle_puzzle_input(Game *game, Puzzle *puzzle) {
                                 if (puzzle->pieces[i].dest_rect.x + PIECE_SIZE > puzzle->table_rect.x + puzzle->table_rect.w)
                                     puzzle->pieces[i].dest_rect.x = puzzle->table_rect.x + puzzle->table_rect.w - PIECE_SIZE;
                                 if (puzzle->pieces[i].dest_rect.y + PIECE_SIZE > puzzle->table_rect.y + puzzle->table_rect.h)
-                                    puzzle->pieces[i].dest_rect.y = puzzle->table_rect.y + puzzle->table_rect.h - PIECE_SIZE;
+                                puzzle->pieces[i].dest_rect.y = puzzle->table_rect.y + puzzle->table_rect.h - PIECE_SIZE;
                             } else {
-                                // Snap to nearest grid position
                                 int grid_x = (game->x_mouse - PUZZLE_X + PIECE_SIZE / 2) / PIECE_SIZE;
                                 int grid_y = (game->y_mouse - PUZZLE_Y + PIECE_SIZE / 2) / PIECE_SIZE;
-                                grid_x = grid_x < 0 ? 0 : (grid_x > 2 ? 2 : grid_x);
-                                grid_y = grid_y < 0 ? 0 : (grid_y > 2 ? 2 : grid_y);
+                                grid_x = grid_x < 0 ? 0 : (grid_x >= puzzle->grid_size ? puzzle->grid_size - 1 : grid_x);
+                                grid_y = grid_y < 0 ? 0 : (grid_y >= puzzle->grid_size ? puzzle->grid_size - 1 : grid_y);
                                 int new_x = PUZZLE_X + grid_x * PIECE_SIZE;
                                 int new_y = PUZZLE_Y + grid_y * PIECE_SIZE;
 
-                                // Check for overlap in grid
                                 int occupant = -1;
-                                for (int j = 0; j < 9; j++) {
+                                for (int j = 0; j < puzzle->piece_count; j++) {
                                     if (j != i && puzzle->pieces[j].dest_rect.x == new_x &&
                                         puzzle->pieces[j].dest_rect.y == new_y) {
                                         occupant = j;
                                         break;
                                     }
                                 }
-                                if (occupant != -1) {
-                                    // Swap positions
-                                    SDL_Rect temp = puzzle->pieces[occupant].dest_rect;
-                                    puzzle->pieces[occupant].dest_rect = puzzle->pieces[i].dest_rect;
-                                    puzzle->pieces[i].dest_rect = (SDL_Rect){new_x, new_y, PIECE_SIZE, PIECE_SIZE};
+
+                                if (occupant == -1) {
+                                    puzzle->pieces[i].dest_rect.x = new_x;
+                                    puzzle->pieces[i].dest_rect.y = new_y;
                                 } else {
-                                    // Place in empty cell
-                                    puzzle->pieces[i].dest_rect = (SDL_Rect){new_x, new_y, PIECE_SIZE, PIECE_SIZE};
+                                    puzzle->pieces[i].dest_rect.x = game->x_mouse - PIECE_SIZE / 2;
+                                    puzzle->pieces[i].dest_rect.y = game->y_mouse - PIECE_SIZE / 2;
                                 }
                             }
                         }
                     }
+                    if (puzzle->return_button && puzzle->return_button->isClicked && is_hovered(game, &puzzle->return_button->b_rect)) {
+                        game->state = 1;
+                    }
+                    puzzle->return_button->isClicked = 0;
                 }
                 break;
             case SDL_MOUSEMOTION:
-                game->x_mouse = e.motion.x;
-                game->y_mouse = e.motion.y;
-                game->last_mouse_motion = SDL_GetTicks();
-                game->controller_active = 0;
-                for (int i = 0; i < 9; i++) {
+                for (int i = 0; i < puzzle->piece_count; i++) {
                     if (puzzle->pieces[i].is_dragging) {
-                        int PIECE_SIZE = puzzle->image->w / 3;
-                        // Center piece under cursor
-                        puzzle->pieces[i].dest_rect.x = game->x_mouse - (PIECE_SIZE / 2);
-                        puzzle->pieces[i].dest_rect.y = game->y_mouse - (PIECE_SIZE / 2);
+                        int PIECE_SIZE = puzzle->image->w / puzzle->grid_size;
+                        puzzle->pieces[i].dest_rect.x = game->x_mouse - PIECE_SIZE / 2;
+                        puzzle->pieces[i].dest_rect.y = game->y_mouse - PIECE_SIZE / 2;
                     }
                 }
+                update_buttons(&game, puzzle->return_button , 1);
                 break;
         }
     }
@@ -299,7 +321,7 @@ static void handle_puzzle_input(Game *game, Puzzle *puzzle) {
 
 static void check_puzzle_solved(Puzzle *puzzle) {
     puzzle->is_solved = 1;
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < puzzle->piece_count; i++) {
         if (puzzle->pieces[i].dest_rect.x != puzzle->pieces[i].correct_x ||
             puzzle->pieces[i].dest_rect.y != puzzle->pieces[i].correct_y) {
             puzzle->is_solved = 0;
@@ -309,94 +331,59 @@ static void check_puzzle_solved(Puzzle *puzzle) {
 }
 
 static void render_puzzle(Game *game, Puzzle *puzzle) {
-    // Render background
     SDL_BlitSurface(puzzle->background, NULL, game->screen, NULL);
 
-    int PIECE_SIZE = puzzle->image->w / 3;
-    int PUZZLE_X = (WIDTH - PIECE_SIZE * PUZZLE_GRID_SIZE) / 2;
-    int PUZZLE_Y = 120;
+    SDL_Rect reference_pos = {TABLE_X + (TABLE_WIDTH - REFERENCE_SIZE) / 2, TABLE_Y - REFERENCE_SIZE - 10, REFERENCE_SIZE, REFERENCE_SIZE};
+    SDL_BlitSurface(puzzle->reference_image, NULL, game->screen, &reference_pos);
 
-    // Render reference image (top left)
-    SDL_Rect ref_rect = {10, 10, REFERENCE_SIZE, REFERENCE_SIZE};
-    SDL_BlitSurface(puzzle->reference_image, NULL, game->screen, &ref_rect);
+    SDL_FillRect(game->screen, &puzzle->table_rect, SDL_MapRGB(game->screen->format, 200, 200, 200));
+    SDL_FillRect(game->screen, &puzzle->scramble_table_rect, SDL_MapRGB(game->screen->format, 200, 200, 200));
 
-    // Render scramble table (bottom)
-    SDL_FillRect(game->screen, &puzzle->scramble_table_rect, SDL_MapRGB(game->screen->format, 100, 100, 100));
-    draw_rect(game->screen, puzzle->scramble_table_rect.x, puzzle->scramble_table_rect.y,
-              puzzle->scramble_table_rect.w, puzzle->scramble_table_rect.h, 255, 255, 255);
-
-    // Render holding table (right)
-    SDL_FillRect(game->screen, &puzzle->table_rect, SDL_MapRGB(game->screen->format, 100, 100, 100));
-    draw_rect(game->screen, puzzle->table_rect.x, puzzle->table_rect.y,
-              puzzle->table_rect.w, puzzle->table_rect.h, 255, 255, 255);
-
-    // Render grid
-    for (int i = 0; i <= PUZZLE_GRID_SIZE; i++) {
-        // Vertical lines
-        draw_rect(game->screen, PUZZLE_X + i * PIECE_SIZE, PUZZLE_Y,
-                  1, PIECE_SIZE * PUZZLE_GRID_SIZE, 255, 255, 255);
-        // Horizontal lines
-        draw_rect(game->screen, PUZZLE_X, PUZZLE_Y + i * PIECE_SIZE,
-                  PIECE_SIZE * PUZZLE_GRID_SIZE, 1, 255, 255, 255);
+    // Highlight hovered grid spot
+    SDL_Rect hovered = get_hovered_grid_spot(game, puzzle);
+    if (hovered.x != -1) {
+        draw_rect(game->screen, hovered.x, hovered.y, hovered.w, hovered.h, 0, 255, 0);
     }
 
-    // Render pieces
-    for (int i = 0; i < 9; i++) {
-        SDL_BlitSurface(puzzle->pieces[i].piece, NULL, game->screen,
-                       &puzzle->pieces[i].dest_rect);
-        // Draw border around pieces
-        draw_rect(game->screen, puzzle->pieces[i].dest_rect.x, puzzle->pieces[i].dest_rect.y,
-                 puzzle->pieces[i].dest_rect.w, puzzle->pieces[i].dest_rect.h,
-                 255, 255, 255);
+    for (int i = 0; i < puzzle->piece_count; i++) {
+        SDL_BlitSurface(puzzle->pieces[i].piece, NULL, game->screen, &puzzle->pieces[i].dest_rect);
     }
-    update_buttons(game, puzzle->return_button, 1);
-    render_button(game, puzzle->return_button, 1);
+
+    render_buttons(game, puzzle->return_button , 1);
 }
 
-int shity_function(Game *game) {
-    printf("Puzzle function started\n");
-
+int shity_function(Game *game, PuzzleDifficulty difficulty) {
     Puzzle puzzle = {0};
-    init_puzzle(game, &puzzle);
-    if (game->state == 1) { // Failed to load image or other initialization error
+    init_puzzle(game, &puzzle, difficulty);
+
+    if (game->state == 1) {
         free_puzzle(&puzzle);
-        return 0;
+        return 1;
     }
 
-    srand(SDL_GetTicks()); // Seed random for shuffling
-
-    while (game->state == 2 && !game->quite) {
+    while (!game->quite && game->state == 2) {
         Uint32 frame_start = SDL_GetTicks();
 
         SDL_GetMouseState(&game->x_mouse, &game->y_mouse);
         game->released_mouse = 0;
-        game->mouse_pressed = 0;
 
         handle_puzzle_input(game, &puzzle);
-
-        if (puzzle.return_button->isClicked) {
-            game->state = 1;
-            break;
-        }
-
         check_puzzle_solved(&puzzle);
+
         if (puzzle.is_solved) {
-            printf("Puzzle solved!\n");
             game->state = 1;
-            break;
         }
 
         render_puzzle(game, &puzzle);
-
         SDL_Flip(game->screen);
 
         Uint32 frame_time = SDL_GetTicks() - frame_start;
-        if (frame_time < 1000 / game->fps) {
-            SDL_Delay(1000 / game->fps - frame_time);
+        Uint32 frame_duration = 1000 / game->fps;
+        if (frame_time < frame_duration) {
+            SDL_Delay(frame_duration - frame_time);
         }
     }
 
     free_puzzle(&puzzle);
-    printf("Puzzle function ended\n");
-    return 69;
+    return 0;
 }
