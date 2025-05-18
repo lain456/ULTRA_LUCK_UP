@@ -46,6 +46,14 @@ void Ini_Game(Game *game) {
     game->main_font = TTF_OpenFont(FREDOKA_PATH, 28);
     game->mid_font = TTF_OpenFont(FREDOKA_PATH, 30);
     game->big_main_font = TTF_OpenFont(FREDOKA_PATH, 45);
+
+
+    if (!game->main_font) {
+        printf("Error: Failed to load main_font: %s\n", TTF_GetError());
+        exit(1);
+    }
+
+
     if (!game->mini_font || !game->main_font || !game->mid_font || !game->big_main_font) {
         printf("Failed to load fonts: %s\n", TTF_GetError());
         TTF_Quit();

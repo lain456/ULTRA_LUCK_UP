@@ -81,6 +81,7 @@
 #define CYCLE 32
 #define MAX_ENEMIES 2
 
+// Structures
 typedef struct {
     int B9, B10, B11, B12, B13;
     int JX, JY, JSW;
@@ -92,30 +93,26 @@ typedef struct {
     char *writen;
     SDL_Color color;
     TTF_Font *font;
-    // function output - AKA requre treatment
+    // function output
     SDL_Surface *surf;
     SDL_Rect rect;
-}Text;
+} Text;
 
 typedef struct {
-    int h,w,x,y,x_center,y_center,type;
-    //prototype
+    int h, w, x, y, x_center, y_center, type;
     SDL_Rect b_rect;
     SDL_Surface *basic;
     SDL_Surface *final;
-    // custom
     SDL_Rect rect;
-    SDL_Surface * not_hovered;
-    SDL_Surface * hovered;
-    //text
+    SDL_Surface *not_hovered;
+    SDL_Surface *hovered;
     Text txt;
-    //state
     int b_switch;
     int isHovered;
     int isPressed;
     int isClicked;
     int isSelected;
-}Button;
+} Button;
 
 typedef struct {
     SDL_Surface *bg;
@@ -135,18 +132,6 @@ typedef struct {
     int x_dif;
 } Slider;
 
-
-
-
-
-
-
-
-
-
-// please i wanna add input handeling to my menus
-
-
 typedef struct {
     SDL_Rect rect;          // Input box rectangle
     Text txt;               // Text displayed inside
@@ -157,7 +142,39 @@ typedef struct {
     SDL_Surface *not_hovered; // Surface when not hovered
     SDL_Surface *hovered;     // Surface when hovered
     SDL_Surface *active;      // Surface when active
+    int cursor_visible;       // Cursor visibility state
+    Uint32 last_cursor_toggle; // Time of last cursor toggle
 } Input_box;
+
+
+
+
+typedef struct
+{
+
+    SDL_Surface *bg;
+    Button b;
+
+
+
+
+    SDL_Rect rect;          // Input box rectangle
+    Text txt;               // Text displayed inside
+    int is_active;          // Whether the input box is active for typing
+    char value[256];        // Stored text value
+    int max_length;         // Maximum length of input
+    int is_hovered;         // Hover state
+    SDL_Surface *not_hovered; // Surface when not hovered
+    SDL_Surface *hovered;     // Surface when hovered
+    SDL_Surface *active;      // Surface when active
+    int cursor_visible;       // Cursor visibility state
+    Uint32 last_cursor_toggle; // Time of last cursor toggle
+
+
+}My_input;
+
+
+
 
 
 
@@ -177,19 +194,20 @@ typedef struct {
     Text *txtlist;
     int txt_ct;
     SDL_Surface *background;
-    int t_margine,b_margine;
+    int t_margine, b_margine;
     Slider *slider_list;
-    int s_ct,s_margine;
-    int i_ct;
+    int s_ct, s_margine;
     Input_box *input_list;
-}Menu;
+    My_input *my_inputlist;
+    int i_ct, i_margine;
+} Menu;
 
 typedef struct M_node {
     struct M_node *back;
     Menu *menu;
     int id;
     struct M_node *child_list;
-}M_node;
+} M_node;
 
 typedef struct {
     SDLKey up;
@@ -200,7 +218,7 @@ typedef struct {
     SDLKey dash;
     float x_analog;
     float y_analog;
-}Input;
+} Input;
 
 typedef struct {
     SDL_Rect rect;
@@ -208,11 +226,11 @@ typedef struct {
 } Platform;
 
 typedef struct {
-    //movements
+    // movements
     int x, y;
     float x_speed, y_speed;
     float x_accel, y_accel;
-    //stats
+    // stats
     int health;
     int level;
     // direction
@@ -265,12 +283,12 @@ typedef struct {
     TTF_Font *main_font;
     TTF_Font *mid_font;
     TTF_Font *big_main_font;
-    int x_mouse,y_mouse,x_button_size,y_button_size,margin;
+    int x_mouse, y_mouse, x_button_size, y_button_size, margin;
     int released_mouse;
     int mouse_pressed;
     SDL_Surface *b_yellow;
     SDL_Surface *b_purple;
-    int x_slider_size,y_slider_size;
+    int x_slider_size, y_slider_size;
     SDL_Color slider_fill_color;
     SDL_Color slider_bg_color;
     SDL_Surface *slider_bg, *slider_fill, *b_slider;
@@ -303,7 +321,9 @@ typedef struct {
     Uint32 last_mouse_motion;
     Platform *platforms;
     int platform_count;
-}Game;
+    char player_name[256]; // New field for input box text
+
+} Game;
 
 int gameplay(Game *game);
 int pizza();

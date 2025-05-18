@@ -15,20 +15,13 @@
 
 
 
+
+
+
 void Init_Menu(Menu *menu);
-
-
-void render_menu(Game *game,Menu *menu);
-
-
-M_node *M_link_Node(Menu* menu,M_node *parent);
-
-void  create_main_menu();
-
-
-
-
-void node_Init(M_node *node,Menu *menu,int id );
+void render_menu(Game *game, Menu *menu);
+void node_Init(M_node *node, Menu *menu, int id);
+void free_menu(Menu *menu);
 
 
 

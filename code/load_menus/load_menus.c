@@ -4,7 +4,8 @@
 #include "../game/game.h"
 #include "../tools/tools.h"
 #include "../slider/slider.h"
-#include "../input/input.h"
+
+#include "../my_input/my_input.h"
 
 Menu play_menu(Game game) {
     Menu play;
@@ -159,9 +160,15 @@ Menu multiplayer_menu(Game game) {
     return new_menu;
 }
 
+
+
+
+// ... Other menu functions unchanged ...
+
 Menu help_menu(Game game) {
     Menu new_menu;
     Init_Menu(&new_menu);
+    new_menu.background = create_color_surface(game.width, game.height, 0, 0, 0);
 
     new_menu.b_ct = 1;
     new_menu.txt_ct = 1;
@@ -171,17 +178,23 @@ Menu help_menu(Game game) {
 
     new_menu.buttonlist = (Button *)malloc(sizeof(Button) * new_menu.b_ct);
     new_menu.txtlist = (Text *)malloc(sizeof(Text) * new_menu.txt_ct);
-    new_menu.input_list = (Input_box *)malloc(sizeof(Input_box) * new_menu.i_ct);
+    new_menu.my_inputlist = (My_input *)malloc(sizeof(My_input) * new_menu.i_ct);
 
-    char *button_strings[] = {"return"};
-    new_menu.buttonlist[0] = *create_button(&game, (WIDTH - game.x_button_size) * 10 / 20, (HEIGHT - game.y_button_size) * 3 / 4, game.y_button_size, game.x_button_size, button_strings[0], WHITE, 1);
+    new_menu.buttonlist[0] = *create_button(&game, (WIDTH - game.x_button_size) * 10 / 20, (HEIGHT - game.y_button_size) * 3 / 4, game.y_button_size, game.x_button_size, "return", WHITE, 1);
 
-    new_menu.txtlist[0] = *create_txt("Enter your name:", game.big_main_font, BLACK, WIDTH * 1 / 5, HEIGHT * 2 / 5);
+    new_menu.txtlist[0] = *create_txt(" enter your name.. ", game.big_main_font, WHITE, (WIDTH - 300) / 2, HEIGHT * 2 / 5);
 
-    new_menu.input_list[0] = *create_input_box(&game, (WIDTH - game.x_button_size) / 2, HEIGHT / 2, game.x_button_size, game.y_button_size, "", WHITE, 20);
+    InputStyle style = {
+        .not_hovered_color = {0, 200, 0}, // Green
+        .hovered_color = {0, 255, 0}, // Brighter green
+        .active_color = {100, 255, 100} // Light green
+    };
+    init_my_input(&game, &new_menu.my_inputlist[0], (WIDTH - 150) / 2, (HEIGHT - 70) * 3 / 5, 150, 70, &style);
 
     return new_menu;
 }
+
+// ... Other menu functions unchanged ...
 
 Menu difficulty_menu(Game game) {
     Menu new_menu;

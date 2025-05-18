@@ -154,6 +154,13 @@ build CMakeFiles/ULTRA_LUCK_UP.dir/code/input/input.c.o: C_COMPILER__ULTRA_LUCK_
   OBJECT_DIR = CMakeFiles/ULTRA_LUCK_UP.dir
   OBJECT_FILE_DIR = CMakeFiles/ULTRA_LUCK_UP.dir/code/input
 
+build CMakeFiles/ULTRA_LUCK_UP.dir/code/my_input/my_input.c.o: C_COMPILER__ULTRA_LUCK_UP_unscanned_Debug /home/lain/Desktop/nerding/ULTRA-LUCK-UP/code/my_input/my_input.c || cmake_object_order_depends_target_ULTRA_LUCK_UP
+  DEP_FILE = CMakeFiles/ULTRA_LUCK_UP.dir/code/my_input/my_input.c.o.d
+  FLAGS = -g -std=gnu11 -fdiagnostics-color=always
+  INCLUDES = -I/usr/include/SDL -I/home/lain/Desktop/nerding/ULTRA-LUCK-UP/init -I/home/lain/Desktop/nerding/ULTRA-LUCK-UP/code
+  OBJECT_DIR = CMakeFiles/ULTRA_LUCK_UP.dir
+  OBJECT_FILE_DIR = CMakeFiles/ULTRA_LUCK_UP.dir/code/my_input
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target ULTRA_LUCK_UP
@@ -162,7 +169,7 @@ build CMakeFiles/ULTRA_LUCK_UP.dir/code/input/input.c.o: C_COMPILER__ULTRA_LUCK_
 #############################################
 # Link the executable ULTRA_LUCK_UP
 
-build ULTRA_LUCK_UP: C_EXECUTABLE_LINKER__ULTRA_LUCK_UP_Debug CMakeFiles/ULTRA_LUCK_UP.dir/main.c.o CMakeFiles/ULTRA_LUCK_UP.dir/init/init.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/game/game.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/button/button.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/text/txt.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/menu/menu.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/load_menus/load_menus.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/slider/slider.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/tools/tools.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/audio/audio.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/Background/background.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/Player/player.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/arduino/arduino.c.o CMakeFiles/ULTRA_LUCK_UP.dir/shity_code/shity_code.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/input/input.c.o | /usr/lib/x86_64-linux-gnu/libSDLmain.a /usr/lib/x86_64-linux-gnu/libSDL.so /usr/lib/x86_64-linux-gnu/libSDL_image.so /usr/lib/x86_64-linux-gnu/libSDL_ttf.so /usr/lib/x86_64-linux-gnu/libSDL_mixer.so
+build ULTRA_LUCK_UP: C_EXECUTABLE_LINKER__ULTRA_LUCK_UP_Debug CMakeFiles/ULTRA_LUCK_UP.dir/main.c.o CMakeFiles/ULTRA_LUCK_UP.dir/init/init.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/game/game.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/button/button.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/text/txt.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/menu/menu.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/load_menus/load_menus.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/slider/slider.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/tools/tools.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/audio/audio.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/Background/background.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/Player/player.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/arduino/arduino.c.o CMakeFiles/ULTRA_LUCK_UP.dir/shity_code/shity_code.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/input/input.c.o CMakeFiles/ULTRA_LUCK_UP.dir/code/my_input/my_input.c.o | /usr/lib/x86_64-linux-gnu/libSDLmain.a /usr/lib/x86_64-linux-gnu/libSDL.so /usr/lib/x86_64-linux-gnu/libSDL_image.so /usr/lib/x86_64-linux-gnu/libSDL_ttf.so /usr/lib/x86_64-linux-gnu/libSDL_mixer.so
   FLAGS = -g
   LINK_LIBRARIES = /usr/lib/x86_64-linux-gnu/libSDLmain.a  /usr/lib/x86_64-linux-gnu/libSDL.so  /usr/lib/x86_64-linux-gnu/libSDL_image.so  /usr/lib/x86_64-linux-gnu/libSDL_ttf.so  /usr/lib/x86_64-linux-gnu/libSDL_mixer.so
   OBJECT_DIR = CMakeFiles/ULTRA_LUCK_UP.dir

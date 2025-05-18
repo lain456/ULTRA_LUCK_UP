@@ -22,6 +22,7 @@ include_directories(
 # Add executable with all necessary source files
 add_executable(ULTRA_LUCK_UP
         main.c
+        code
         init/init.c
         code/game/game.c
         code/button/button.c
@@ -37,7 +38,9 @@ add_executable(ULTRA_LUCK_UP
         shity_code/shity_code.c
         shity_code/shity_code.h
         code/input/input.c
-        code/input/input.h  # Add this line if it's missing
+        code/input/input.h
+        code/my_input/my_input.c
+        code/my_input/my_input.h  # Add this line if it's missing
 )
 
 # Link libraries
