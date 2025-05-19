@@ -34,6 +34,9 @@ void initPlayer(Player *player) {
     player->frame_counter = 0;
     player->jump_count = 0;
     player->max_jumps = 2;
+    player->is_dashing = 0; // Initialize dash fields
+    player->dash_start_time = 0;
+    player->dash_cooldown_end = 0;
     for (int i = 0; i < 7; i++) {
         player->flying_to_the_right[i] = NULL;
         player->flying_to_the_left[i] = NULL;
@@ -516,8 +519,7 @@ void initPlayer(Player *player) {
     printf("Player sprite loaded successfully (player_num=%d)\n", player->player_num);
 }
 
-void handlePlayerMovement(Game *game ,Player *player, SDL_Event e)
-{
+void handlePlayerMovement(Game *game, Player *player, SDL_Event e) {
     if (!player) {
         printf("Error: Player pointer is null in handlePlayerMovement\n");
         return;
@@ -528,6 +530,7 @@ void handlePlayerMovement(Game *game ,Player *player, SDL_Event e)
     const Uint32 right = key_name_to_sdlkey(game->controls_p1.right);
     const Uint32 down = key_name_to_sdlkey(game->controls_p1.down);
     const Uint32 up = key_name_to_sdlkey(game->controls_p1.up);
+    const Uint32 dash = key_name_to_sdlkey(game->controls_p1.dash); // Added for dash
 
     if (e.type == SDL_KEYDOWN) {
         if (e.key.keysym.sym == left) {
@@ -540,6 +543,13 @@ void handlePlayerMovement(Game *game ,Player *player, SDL_Event e)
                 printf("Jump triggered\n");
             }
             player->jump = 1;
+        } else if (e.key.keysym.sym == dash && !player->is_dashing) {
+            // Check if dash is off cooldown
+            if (SDL_GetTicks() >= player->dash_cooldown_end) {
+                player->is_dashing = 1;
+                player->dash_start_time = SDL_GetTicks();
+                printf("Dash triggered\n");
+            }
         }
     } else if (e.type == SDL_KEYUP) {
         if (e.key.keysym.sym == left) {
@@ -552,15 +562,18 @@ void handlePlayerMovement(Game *game ,Player *player, SDL_Event e)
     }
 }
 
-
 void handlePlayer2Movement(Game *game, Player *player, SDL_Event e) {
-
+    if (!player) {
+        printf("Error: Player pointer is null in handlePlayer2Movement\n");
+        return;
+    }
 
     const Uint32 JUMP = (Uint32)key_name_to_sdlkey(game->controls_p2.jump);
     const Uint32 left = key_name_to_sdlkey(game->controls_p2.left);
     const Uint32 right = key_name_to_sdlkey(game->controls_p2.right);
     const Uint32 down = key_name_to_sdlkey(game->controls_p2.down);
     const Uint32 up = key_name_to_sdlkey(game->controls_p2.up);
+    const Uint32 dash = key_name_to_sdlkey(game->controls_p2.dash); // Added for dash
 
     if (e.type == SDL_KEYDOWN) {
         if (e.key.keysym.sym == left) {
@@ -573,6 +586,13 @@ void handlePlayer2Movement(Game *game, Player *player, SDL_Event e) {
                 printf("Jump triggered\n");
             }
             player->jump = 1;
+        } else if (e.key.keysym.sym == dash && !player->is_dashing) {
+            // Check if dash is off cooldown
+            if (SDL_GetTicks() >= player->dash_cooldown_end) {
+                player->is_dashing = 1;
+                player->dash_start_time = SDL_GetTicks();
+                printf("Dash triggered\n");
+            }
         }
     } else if (e.type == SDL_KEYUP) {
         if (e.key.keysym.sym == left) {
@@ -584,8 +604,6 @@ void handlePlayer2Movement(Game *game, Player *player, SDL_Event e) {
         }
     }
 }
-
-
 
 void checkPlatformCollision(Player *player, Platform *platform) {
     if (!player || !platform) {
@@ -635,14 +653,35 @@ void updatePlayer(Game *game, Player *player) {
         printf("Grounded, jump_count reset to %d\n", player->jump_count);
     }
 
-    // Horizontal movement
-    float target_x_speed = 0;
-    if (player->moveLeft) target_x_speed = -5.0;
-    if (player->moveRight) target_x_speed = 5.0;
-    player->x_speed += (target_x_speed - player->x_speed) * 0.2;
-    if (target_x_speed == 0) player->x_speed *= 0.8;
-    if (player->moveLeft) player->move = -1;
-    if (player->moveRight) player->move = 1;
+    // Handle dash
+    const Uint32 DASH_DURATION = 200; // 200ms dash
+    const Uint32 DASH_COOLDOWN = 1000; // 1s cooldown
+    const float DASH_SPEED = 15.0; // Dash speed
+    if (player->is_dashing) {
+        Uint32 current_time = SDL_GetTicks();
+        if (current_time - player->dash_start_time <= DASH_DURATION) {
+            // Apply dash movement
+            player->x_speed = (player->move == 1) ? DASH_SPEED : -DASH_SPEED;
+            // Prevent normal movement inputs during dash
+            player->moveLeft = 0;
+            player->moveRight = 0;
+        } else {
+            // End dash
+            player->is_dashing = 0;
+            player->x_speed = 0; // Reset speed after dash
+            player->dash_cooldown_end = current_time + DASH_COOLDOWN;
+            printf("Dash ended, cooldown until %u\n", player->dash_cooldown_end);
+        }
+    } else {
+        // Normal horizontal movement
+        float target_x_speed = 0;
+        if (player->moveLeft) target_x_speed = -5.0;
+        if (player->moveRight) target_x_speed = 5.0;
+        player->x_speed += (target_x_speed - player->x_speed) * 0.2;
+        if (target_x_speed == 0) player->x_speed *= 0.8;
+        if (player->moveLeft) player->move = -1;
+        if (player->moveRight) player->move = 1;
+    }
 
     // Gravity
     player->y_speed += player->y_accel;
@@ -689,8 +728,9 @@ void updatePlayer(Game *game, Player *player) {
     }
 
     // Update animation
+    int frame_delay = player->is_dashing ? 2 : 4; // Faster animation during dash
     player->frame_counter++;
-    if (player->frame_counter >= 4) {
+    if (player->frame_counter >= frame_delay) {
         player->index = (player->index + 1) % player->cycle;
         player->frame_counter = 0;
     }

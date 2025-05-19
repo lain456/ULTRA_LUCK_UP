@@ -37,12 +37,13 @@ add_executable(ULTRA_LUCK_UP
         code/arduino/arduino.c
         shity_code/shity_code.c
         shity_code/shity_code.h
-        code/input/input.c
-        code/input/input.h
+
         code/my_input/my_input.c
         code/my_input/my_input.h
         code/keymap/keymap.c
-        code/keymap/keymap.h  # Add this line if it's missing
+        code/keymap/keymap.h
+        levels/levels.c
+        levels/levels.h  # Add this line if it's missing
 )
 
 # Link libraries

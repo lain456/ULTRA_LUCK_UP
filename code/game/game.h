@@ -25,8 +25,6 @@
 #define BIRD_OG_HEIGHT 773
 
 // paths used :
-
-
 #define GOOD_BG "../assets/graphics/menu/background.png"
 // basic config
 #define BACK_PNG_PATH "../assets/graphics/basic/back.png"
@@ -118,14 +116,6 @@ typedef struct {
     int isSelected;
 } Button;
 
-
-
-typedef struct {
-    SDL_Color not_hovered_color;
-    SDL_Color hovered_color;
-    SDL_Color active_color;
-} InputStyle;
-
 typedef struct {
     SDL_Surface *bg;
     SDL_Color color;
@@ -143,20 +133,6 @@ typedef struct {
     SDL_Color b_color;
     int x_dif;
 } Slider;
-
-typedef struct {
-    SDL_Rect rect;          // Input box rectangle
-    Text txt;               // Text displayed inside
-    int is_active;          // Whether the input box is active for typing
-    char value[256];        // Stored text value
-    int max_length;         // Maximum length of input
-    int is_hovered;         // Hover state
-    SDL_Surface *not_hovered; // Surface when not hovered
-    SDL_Surface *hovered;     // Surface when hovered
-    SDL_Surface *active;      // Surface when active
-    int cursor_visible;       // Cursor visibility state
-    Uint32 last_cursor_toggle; // Time of last cursor toggle
-} Input_box;
 
 typedef struct {
     SDL_Surface *bg;
@@ -180,6 +156,7 @@ typedef struct {
     char right[32];
     char up[32];
     char down[32];
+    char dash[32]; // Added for dash ability
     char menu_up[32];
     char menu_down[32];
     char menu_select[32];
@@ -196,7 +173,6 @@ typedef struct {
     int t_margine, b_margine;
     Slider *slider_list;
     int s_ct, s_margine;
-    Input_box *input_list;
     My_input *my_inputlist;
     int i_ct, i_margine;
 } Menu;
@@ -224,6 +200,15 @@ typedef struct {
     SDL_Rect h_rect;
 } Platform;
 
+
+
+typedef struct
+{
+    SDL_Color not_hovered_color ;
+    SDL_Color hovered_color ;
+    SDL_Color active_color ;
+}InputStyle;
+
 typedef struct {
     // movements
     int x, y;
@@ -235,7 +220,7 @@ typedef struct {
     // direction
     int move;
     int jump;
-    int dash;
+    int dash; // Added for dash ability
     int attack;
     int moveLeft, moveRight, moveUp, moveDown;
     // animation spritesheet
@@ -257,6 +242,10 @@ typedef struct {
     int jump_count;
     int max_jumps;
     int jump_trigger;
+    // Dash-related fields
+    int is_dashing;
+    Uint32 dash_start_time;
+    Uint32 dash_cooldown_end;
 } Player;
 
 typedef struct {
@@ -327,6 +316,5 @@ typedef struct {
 
 int gameplay(Game *game);
 int pizza();
-
 
 #endif //GAME_H

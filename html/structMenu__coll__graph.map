@@ -1,18 +1,15 @@
 <map id="Menu" name="Menu">
-<area shape="rect" id="Node000001" title=" " alt="" coords="159,280,218,305"/>
-<area shape="rect" id="Node000002" href="$structButton.html" title=" " alt="" coords="104,93,169,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,126,57,143,26,165,16,177,10,189,9,202,14,216,28,232,45,246,83,267,124,280,159,286,158,291,122,285,81,272,42,251,24,236,10,219,4,203,4,188,11,174,23,161,55,139,90,121"/>
-<area shape="rect" id="Node000004" href="$structSlider.html" title=" " alt="" coords="91,192,150,217"/>
-<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="129,132,125,143,122,192,117,191,120,142,123,131"/>
-<area shape="rect" id="Node000006" href="$structMy__input.html" title=" " alt="" coords="174,192,256,217"/>
-<area shape="poly" id="edge9_Node000006_Node000002" title=" " alt="" coords="159,127,172,141,209,190,205,193,167,144,155,130"/>
-<area shape="rect" id="Node000003" href="$structText.html" title=" " alt="" coords="238,5,288,31"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="272,44,273,54,287,158,288,215,285,239,277,257,265,270,250,280,218,290,217,285,248,275,262,266,273,255,280,238,283,215,282,158,268,55,267,45"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="227,38,192,57,148,95,145,91,189,52,224,33"/>
-<area shape="rect" id="Node000005" href="$structInput__box.html" title=" " alt="" coords="344,143,430,168"/>
-<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="294,36,314,53,354,100,382,141,377,144,350,103,310,57,291,41"/>
-<area shape="poly" id="edge10_Node000006_Node000003" title=" " alt="" coords="259,45,220,193,215,191,254,44"/>
-<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="113,231,112,244,116,255,135,272,160,283,158,288,132,277,111,257,107,244,108,231"/>
-<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="377,182,352,221,334,241,314,258,290,271,265,281,219,291,217,286,264,275,288,266,311,254,330,237,347,218,373,179"/>
-<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="198,230,192,242,189,262,189,280,184,280,183,261,187,241,193,227"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="42,269,101,295"/>
+<area shape="rect" id="Node000002" href="$structButton.html" title=" " alt="" coords="103,93,168,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,128,70,151,57,166,46,182,42,205,46,229,66,268,61,270,41,230,36,205,41,180,52,162,67,147,98,123"/>
+<area shape="rect" id="Node000004" href="$structSlider.html" title=" " alt="" coords="122,181,181,207"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="137,133,140,157,148,180,143,182,134,158,132,133"/>
+<area shape="rect" id="Node000005" href="$structMy__input.html" title=" " alt="" coords="205,181,288,207"/>
+<area shape="poly" id="edge7_Node000005_Node000002" title=" " alt="" coords="164,125,185,141,234,179,230,183,182,145,161,129"/>
+<area shape="rect" id="Node000003" href="$structText.html" title=" " alt="" coords="111,5,160,31"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="108,41,57,83,33,112,15,144,9,162,10,179,20,203,42,244,61,268,57,271,37,247,15,205,4,180,4,161,11,142,29,109,53,80,104,37"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="138,45,138,93,133,93,133,45"/>
+<area shape="poly" id="edge8_Node000005_Node000003" title=" " alt="" coords="156,40,166,53,222,141,243,180,238,182,217,144,161,56,152,43"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="134,219,85,271,81,267,130,215"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="228,219,190,248,145,267,102,278,101,273,143,262,188,243,224,215"/>
 </map>

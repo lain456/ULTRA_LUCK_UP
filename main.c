@@ -10,7 +10,7 @@
 #include "text/txt.h"
 #include "menu/menu.h"
 #include "arduino/arduino.h"
-#include "./input/input.h"
+
 #include "shity_code/shity_code.h"
 #include "my_input/my_input.h"
 

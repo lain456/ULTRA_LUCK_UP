@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['text_0',['Text',['../structText.html',1,'']]]
+  ['slider_0',['Slider',['../structSlider.html',1,'']]]
 ];

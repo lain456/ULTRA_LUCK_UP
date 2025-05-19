@@ -191,6 +191,9 @@ Menu help_menu(Game game) {
     return new_menu;
 }
 
+
+
+
 Menu difficulty_menu(Game game) {
     Menu new_menu;
     Init_Menu(&new_menu);
@@ -215,27 +218,29 @@ Menu difficulty_menu(Game game) {
     return new_menu;
 }
 
+
+
 Menu controls_menu(Game game) {
     Menu new_menu;
     Init_Menu(&new_menu);
-    new_menu.background = scaleSurface(IMG_Load(GOOD_BG),game.width ,game.height);
+    new_menu.background = scaleSurface(IMG_Load(GOOD_BG), game.width, game.height);
 
     new_menu.b_ct = 3; // Return, Save, Reset
-    new_menu.txt_ct = 17; // Titles, labels, and navigation header
-    new_menu.i_ct = 14; // 5 P1, 5 P2, 4 navigation
+    new_menu.txt_ct = 19; // Titles, labels, and navigation header
+    new_menu.i_ct = 16; // 5 P1, 5 P2, 4 navigation, 2 dash
     new_menu.t_margine = 5;
-    new_menu.b_margine = 30; // Increased for better spacing
+    new_menu.b_margine = 30;
 
     new_menu.buttonlist = (Button *)malloc(sizeof(Button) * new_menu.b_ct);
     new_menu.txtlist = (Text *)malloc(sizeof(Text) * new_menu.txt_ct);
     new_menu.my_inputlist = (My_input *)malloc(sizeof(My_input) * new_menu.i_ct);
 
-    // Buttons: Spaced horizontally using b_margine
+    // Buttons: Spaced horizontally
     int total_button_width = new_menu.b_ct * game.x_button_size + (new_menu.b_ct - 1) * new_menu.b_margine;
     int start_x = (WIDTH - total_button_width) / 2;
-    new_menu.buttonlist[0] = *create_button(&game, start_x, HEIGHT * 8 / 10 +50, game.y_button_size , game.x_button_size, "return", WHITE, 1);
-    new_menu.buttonlist[1] = *create_button(&game, start_x + game.x_button_size + new_menu.b_margine, HEIGHT * 8 / 10 +50, game.y_button_size  , game.x_button_size, "save", WHITE, 1);
-    new_menu.buttonlist[2] = *create_button(&game, start_x + 2 * (game.x_button_size + new_menu.b_margine), HEIGHT * 8 / 10 +50, game.y_button_size , game.x_button_size, "reset", WHITE, 1);
+    new_menu.buttonlist[0] = *create_button(&game, start_x, HEIGHT * 8 / 10 + 50, game.y_button_size, game.x_button_size, "return", WHITE, 1);
+    new_menu.buttonlist[1] = *create_button(&game, start_x + game.x_button_size + new_menu.b_margine, HEIGHT * 8 / 10 + 50, game.y_button_size, game.x_button_size, "save", WHITE, 1);
+    new_menu.buttonlist[2] = *create_button(&game, start_x + 2 * (game.x_button_size + new_menu.b_margine), HEIGHT * 8 / 10 + 50, game.y_button_size, game.x_button_size, "reset", WHITE, 1);
 
     // Text labels
     new_menu.txtlist[0] = *create_txt("Player 1 Controls", game.big_main_font, WHITE, (WIDTH - 400) / 2 - 100, HEIGHT * 1 / 12);
@@ -244,19 +249,19 @@ Menu controls_menu(Game game) {
     new_menu.txtlist[3] = *create_txt("Right:", game.mid_font, WHITE, (WIDTH - 400) / 2 - 100, HEIGHT * 4 / 12);
     new_menu.txtlist[4] = *create_txt("Up:", game.mid_font, WHITE, (WIDTH - 400) / 2 - 100, HEIGHT * 5 / 12);
     new_menu.txtlist[5] = *create_txt("Down:", game.mid_font, WHITE, (WIDTH - 400) / 2 - 100, HEIGHT * 6 / 12);
-
-    new_menu.txtlist[6] = *create_txt("Player 2 Controls", game.big_main_font, WHITE, (WIDTH + 100) / 2  +100 , HEIGHT * 1 / 12);
-    new_menu.txtlist[7] = *create_txt("Jump:", game.mid_font, WHITE, (WIDTH + 100) / 2  +100 , HEIGHT * 2 / 12);
-    new_menu.txtlist[8] = *create_txt("Left:", game.mid_font, WHITE, (WIDTH + 100) / 2  +100 , HEIGHT * 3 / 12);
-    new_menu.txtlist[9] = *create_txt("Right:", game.mid_font, WHITE, (WIDTH + 100) / 2  +100 , HEIGHT * 4 / 12);
-    new_menu.txtlist[10] = *create_txt("Up:", game.mid_font, WHITE, (WIDTH + 100) / 2  +100 , HEIGHT * 5 / 12);
-    new_menu.txtlist[11] = *create_txt("Down:", game.mid_font, WHITE, (WIDTH + 100) / 2  +100 , HEIGHT * 6 / 12);
-
-    new_menu.txtlist[12] = *create_txt("Navigation Controls", game.big_main_font, WHITE, (WIDTH - 400) / 2, HEIGHT * 7 / 12  +50);
-    new_menu.txtlist[13] = *create_txt("Menu Up:", game.mid_font, WHITE, (WIDTH - 400) / 2, HEIGHT * 8 / 12 +50);
-    new_menu.txtlist[14] = *create_txt("Menu Down:", game.mid_font, WHITE, (WIDTH - 400) / 2, HEIGHT * 9 / 12 +50);
-    new_menu.txtlist[15] = *create_txt("back :", game.mid_font, WHITE, (WIDTH + 400) / 2 , HEIGHT * 8 / 12 +50);
-    new_menu.txtlist[16] = *create_txt("next :", game.mid_font, WHITE, (WIDTH + 400 ) / 2 , HEIGHT * 9 / 12 +50);
+    new_menu.txtlist[6] = *create_txt("Player 2 Controls", game.big_main_font, WHITE, (WIDTH + 100) / 2 + 100, HEIGHT * 1 / 12);
+    new_menu.txtlist[7] = *create_txt("Jump:", game.mid_font, WHITE, (WIDTH + 100) / 2 + 100, HEIGHT * 2 / 12);
+    new_menu.txtlist[8] = *create_txt("Left:", game.mid_font, WHITE, (WIDTH + 100) / 2 + 100, HEIGHT * 3 / 12);
+    new_menu.txtlist[9] = *create_txt("Right:", game.mid_font, WHITE, (WIDTH + 100) / 2 + 100, HEIGHT * 4 / 12);
+    new_menu.txtlist[10] = *create_txt("Up:", game.mid_font, WHITE, (WIDTH + 100) / 2 + 100, HEIGHT * 5 / 12);
+    new_menu.txtlist[11] = *create_txt("Down:", game.mid_font, WHITE, (WIDTH + 100) / 2 + 100, HEIGHT * 6 / 12);
+    new_menu.txtlist[12] = *create_txt("Navigation Controls", game.big_main_font, WHITE, (WIDTH - 400) / 2, HEIGHT * 7 / 12 + 50);
+    new_menu.txtlist[13] = *create_txt("Menu Up:", game.mid_font, WHITE, (WIDTH - 400) / 2, HEIGHT * 8 / 12 + 50);
+    new_menu.txtlist[14] = *create_txt("Menu Down:", game.mid_font, WHITE, (WIDTH - 400) / 2, HEIGHT * 9 / 12 + 50);
+    new_menu.txtlist[15] = *create_txt("back:", game.mid_font, WHITE, (WIDTH + 400) / 2, HEIGHT * 8 / 12 + 50);
+    new_menu.txtlist[16] = *create_txt("next:", game.mid_font, WHITE, (WIDTH + 400) / 2, HEIGHT * 9 / 12 + 50);
+    new_menu.txtlist[17] = *create_txt("Dash:", game.mid_font, WHITE, (WIDTH - 400) / 2 - 100, HEIGHT * 7 / 12);
+    new_menu.txtlist[18] = *create_txt("Dash:", game.mid_font, WHITE, (WIDTH + 100) / 2 + 100, HEIGHT * 7 / 12);
 
     InputStyle style = {
         .not_hovered_color = YELLOW,
@@ -264,7 +269,7 @@ Menu controls_menu(Game game) {
         .active_color = WHITE
     };
 
-    // Input boxes (smaller: 80x30)
+    // Input boxes
     int input_width = 95, input_height = 30;
     // P1 controls
     init_my_input(&game, &new_menu.my_inputlist[0], (WIDTH - 500) / 2, HEIGHT * 2 / 12, input_width, input_height, &style);
@@ -279,44 +284,59 @@ Menu controls_menu(Game game) {
     init_my_input(&game, &new_menu.my_inputlist[8], (WIDTH + 200) / 2, HEIGHT * 5 / 12, input_width, input_height, &style);
     init_my_input(&game, &new_menu.my_inputlist[9], (WIDTH + 200) / 2, HEIGHT * 6 / 12, input_width, input_height, &style);
     // Navigation controls
-    init_my_input(&game, &new_menu.my_inputlist[10], (WIDTH - 300) / 2 -100, HEIGHT * 8 / 12 +50, input_width, input_height, &style);
-    init_my_input(&game, &new_menu.my_inputlist[11], (WIDTH - 300) / 2 -100, HEIGHT * 9 / 12 +50, input_width, input_height, &style);
-    init_my_input(&game, &new_menu.my_inputlist[12], (WIDTH - 100) / 2 + 100, HEIGHT * 8 / 12 +50, input_width, input_height, &style);
-    init_my_input(&game, &new_menu.my_inputlist[13], (WIDTH - 100) / 2 + 100, HEIGHT * 9 / 12 +50, input_width, input_height, &style);
+    init_my_input(&game, &new_menu.my_inputlist[10], (WIDTH - 300) / 2 - 100, HEIGHT * 8 / 12 + 50, input_width, input_height, &style);
+    init_my_input(&game, &new_menu.my_inputlist[11], (WIDTH - 300) / 2 - 100, HEIGHT * 9 / 12 + 50, input_width, input_height, &style);
+    init_my_input(&game, &new_menu.my_inputlist[12], (WIDTH - 100) / 2 + 100, HEIGHT * 8 / 12 + 50, input_width, input_height, &style);
+    init_my_input(&game, &new_menu.my_inputlist[13], (WIDTH - 100) / 2 + 100, HEIGHT * 9 / 12 + 50, input_width, input_height, &style);
+    // Dash inputs
+    init_my_input(&game, &new_menu.my_inputlist[14], (WIDTH - 500) / 2, HEIGHT * 7 / 12, input_width, input_height, &style);
+    init_my_input(&game, &new_menu.my_inputlist[15], (WIDTH + 200) / 2, HEIGHT * 7 / 12, input_width, input_height, &style);
 
-    // Default values with numpad support for P2
+    // Default values
     const char *defaults[] = {
-        "space", "q", "d", "z", "s", // P1: WASD + Space
-        "kpenter", "kp4", "kp6", "kp8", "kp5", // P2: Numpad
-        "up", "down", "escape" , "enter" // Navigation
+        "space", "q", "d", "z", "s", // P1
+        "enter", "[4]", "[6]", "[8]", "[5]", // P2
+        "up", "down", "escape", "enter", // Navigation
+        "e", "[0]" // Dash: P1, P2
     };
     for (int i = 0; i < new_menu.i_ct; i++) {
-        if (i <5)
-        {
-            new_menu.my_inputlist[i].rect.x -= 100;
-        }
-
-
-        new_menu.my_inputlist[i].rect.x = new_menu.my_inputlist[i].rect.x + 80 ;
+        // Adjust input positions
+        new_menu.my_inputlist[i].rect.x += 80;
         new_menu.my_inputlist[i].rect.y += -20;
-
-        snprintf(new_menu.my_inputlist[i].value, sizeof(new_menu.my_inputlist[i].value), "%s", defaults[i]);
-        update_input_text(&new_menu.my_inputlist[i]); // Render default text
-        sync_input(&game, &new_menu.my_inputlist[i], i); // Sync to controls
-    }
-    for (int i = 0; i < new_menu.txt_ct; i++)
-    {
-        new_menu.txtlist[i].rect.y += -30 ;
-        new_menu.txtlist[i].rect.x += -200 ;
-        if (i< 12)
+        if (i < 5 || i == 14) { // P1 controls
+            new_menu.my_inputlist[i].rect.x -= 100;
+        }else if (i < 10 || i == 15)
         {
-            new_menu.txtlist[i].rect.x += 100 ;
-
+            //new_menu.my_inputlist[i].rect.x -= 100;
         }
+        // Set defaults
+        snprintf(new_menu.my_inputlist[i].value, sizeof(new_menu.my_inputlist[i].value), "%s", defaults[i]);
+        update_input_text(&new_menu.my_inputlist[i]);
+        sync_input(&game, &new_menu.my_inputlist[i], i);
     }
 
+    // Adjust text positions
 
 
+
+
+
+
+
+
+    for (int i = 0; i < new_menu.txt_ct; i++) {
+        new_menu.txtlist[i].rect.y += -30;
+        if (11 < i  &&  i < 17)
+        {
+            new_menu.txtlist[i].rect.x += -200;
+        }
+        if (i < 6 || i == 17) { // P1 controls + dash
+            new_menu.txtlist[i].rect.x += -100;
+        } else if (i >= 6 && i <= 11 || i == 18) { // P2 controls + dash
+            new_menu.txtlist[i].rect.x += -100;
+        }
+
+    }
 
     return new_menu;
 }

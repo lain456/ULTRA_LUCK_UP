@@ -2,7 +2,7 @@
 #include "../tools/tools.h"
 #include "../text/txt.h"
 #include "../button/button.h"
-#include "../input/input.h"
+
 #include "../slider/slider.h"
 #include "../my_input/my_input.h"
 
@@ -18,7 +18,7 @@ void Init_Menu(Menu *menu) {
     menu->slider_list = NULL;
     menu->s_ct = 0;
     menu->s_margine = 0;
-    menu->input_list = NULL;
+
     menu->i_ct = 0;
     menu->i_margine = 0;
     menu->my_inputlist = NULL;
@@ -63,12 +63,8 @@ void free_menu(Menu *menu) {
         }
         free(menu->slider_list);
     }
-    if (menu->input_list) {
-        for (int i = 0; i < menu->i_ct; i++) {
-            free_input_box(&menu->input_list[i]);
-        }
-        free(menu->input_list);
-    }
+
+
     if (menu->my_inputlist) {
         for (int i = 0; i < menu->i_ct; i++) {
             if (menu->my_inputlist[i].not_hovered) SDL_FreeSurface(menu->my_inputlist[i].not_hovered);

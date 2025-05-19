@@ -74,7 +74,7 @@ void update_input_text(My_input *my_input) {
 }
 
 // Sync input to game controls (called on Save button)
- void sync_input(Game *game, My_input *my_input, int input_index) {
+void sync_input(Game *game, My_input *my_input, int input_index) {
     if (game->current_node->id == 6) { // Help menu
         strncpy(game->player_name, my_input->value, sizeof(game->player_name) - 1);
         game->player_name[sizeof(game->player_name) - 1] = '\0';
@@ -102,6 +102,10 @@ void update_input_text(My_input *my_input) {
         } else if (input_index == 13) {
             strncpy(game->controls_p1.menu_escape, my_input->value, sizeof(game->controls_p1.menu_escape));
             strncpy(game->controls_p2.menu_escape, my_input->value, sizeof(game->controls_p2.menu_escape));
+        } else if (input_index == 14) {
+            strncpy(game->controls_p1.dash, my_input->value, sizeof(game->controls_p1.dash));
+        } else if (input_index == 15) {
+            strncpy(game->controls_p2.dash, my_input->value, sizeof(game->controls_p2.dash));
         }
         printf("Synced control[%d]: key='%s'\n", input_index, my_input->value);
     }
@@ -110,13 +114,15 @@ void update_input_text(My_input *my_input) {
 // Reset controls to defaults
 void reset_controls(Game *game, My_input *my_inputlist) {
     const char *defaults[] = {
-        "space", "left", "right", "up", "down", // P1
-        "w", "a", "d", "w", "s", // P2
-        "up", "down", "return", "escape" // Navigation
+        "space", "q", "d", "z", "s", // P1
+        "enter", "[4]", "[6]", "[8]", "[5]", // P2
+        "up", "down", "escape", "enter", // Navigation
+        "e", "[0]" // Dash: P1, P2
     };
-    for (int i = 0; i < 14; i++) {
+    for (int i = 0; i < 16; i++) {
         strncpy(my_inputlist[i].value, defaults[i], sizeof(my_inputlist[i].value));
         update_input_text(&my_inputlist[i]);
+        sync_input(game, &my_inputlist[i], i); // Sync defaults immediately
     }
 }
 
