@@ -26,6 +26,7 @@
 
 // paths used :
 #define GOOD_BG "../assets/graphics/menu/background.png"
+#define SIDE_SCROLLING_BG "../assets/graphics/basic/side_ways scrolling_bg.png"
 // basic config
 #define BACK_PNG_PATH "../assets/graphics/basic/back.png"
 #define BUTTON_PNG_PATH "../assets/graphics/menu/white.png"
@@ -200,14 +201,11 @@ typedef struct {
     SDL_Rect h_rect;
 } Platform;
 
-
-
-typedef struct
-{
+typedef struct {
     SDL_Color not_hovered_color ;
     SDL_Color hovered_color ;
     SDL_Color active_color ;
-}InputStyle;
+} InputStyle;
 
 typedef struct {
     // movements
@@ -315,6 +313,7 @@ typedef struct {
 } Game;
 
 int gameplay(Game *game);
+int gameplay2(Game *game);
 int pizza();
 
 #endif //GAME_H

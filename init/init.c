@@ -47,12 +47,10 @@ void Ini_Game(Game *game) {
     game->mid_font = TTF_OpenFont(FREDOKA_PATH, 30);
     game->big_main_font = TTF_OpenFont(FREDOKA_PATH, 45);
 
-
     if (!game->main_font) {
         printf("Error: Failed to load main_font: %s\n", TTF_GetError());
         exit(1);
     }
-
 
     if (!game->mini_font || !game->main_font || !game->mid_font || !game->big_main_font) {
         printf("Failed to load fonts: %s\n", TTF_GetError());
@@ -121,4 +119,37 @@ void Ini_Game(Game *game) {
     strcpy(game->arduino_status.Green, "OFF");
     strcpy(game->arduino_status.Red, "OFF");
     game->prev_arduino_status = game->arduino_status;
+
+    // Initialize default controls
+    const char *default_controls[] = {
+        "space", "q", "d", "z", "s", // P1: jump, left, right, up, down
+        "enter", "[4]", "[6]", "[8]", "[5]", // P2: jump, left, right, up, down
+        "up", "down", "escape", "enter", // Navigation: menu_up, menu_down, menu_escape, menu_select
+        "e", "[0]" // Dash: P1, P2
+    };
+
+    strncpy(game->controls_p1.jump, default_controls[0], sizeof(game->controls_p1.jump));
+    strncpy(game->controls_p1.left, default_controls[1], sizeof(game->controls_p1.left));
+    strncpy(game->controls_p1.right, default_controls[2], sizeof(game->controls_p1.right));
+    strncpy(game->controls_p1.up, default_controls[3], sizeof(game->controls_p1.up));
+    strncpy(game->controls_p1.down, default_controls[4], sizeof(game->controls_p1.down));
+    strncpy(game->controls_p2.jump, default_controls[5], sizeof(game->controls_p2.jump));
+    strncpy(game->controls_p2.left, default_controls[6], sizeof(game->controls_p2.left));
+    strncpy(game->controls_p2.right, default_controls[7], sizeof(game->controls_p2.right));
+    strncpy(game->controls_p2.up, default_controls[8], sizeof(game->controls_p2.up));
+    strncpy(game->controls_p2.down, default_controls[9], sizeof(game->controls_p2.down));
+    strncpy(game->controls_p1.menu_up, default_controls[10], sizeof(game->controls_p1.menu_up));
+    strncpy(game->controls_p1.menu_down, default_controls[11], sizeof(game->controls_p1.menu_down));
+    strncpy(game->controls_p1.menu_escape, default_controls[12], sizeof(game->controls_p1.menu_escape));
+    strncpy(game->controls_p1.menu_select, default_controls[13], sizeof(game->controls_p1.menu_select));
+    strncpy(game->controls_p1.dash, default_controls[14], sizeof(game->controls_p1.dash));
+    strncpy(game->controls_p2.dash, default_controls[15], sizeof(game->controls_p2.dash));
+
+    // Copy navigation controls to player 2
+    strncpy(game->controls_p2.menu_up, default_controls[10], sizeof(game->controls_p2.menu_up));
+    strncpy(game->controls_p2.menu_down, default_controls[11], sizeof(game->controls_p2.menu_down));
+    strncpy(game->controls_p2.menu_escape, default_controls[12], sizeof(game->controls_p2.menu_escape));
+    strncpy(game->controls_p2.menu_select, default_controls[13], sizeof(game->controls_p2.menu_select));
+
+    printf("Default controls initialized for P1 and P2\n");
 }

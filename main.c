@@ -88,13 +88,19 @@ int main(int argc, char *argv[]) {
     n6.back = &n1;
     n7.back = &n2;
 
-    game.current_node = &n7;
+    game.current_node = &n1;
     game.current_menu = n1.menu;
+   // game.state = 0;
 
 
 
 
     reset_controls(&game, n7.menu->my_inputlist);
+
+    // trying to debug
+    for (int i = 0; i < n7.menu->i_ct; i++) {
+        sync_input(&game, &game.current_node->menu->my_inputlist[i], i);
+    }
 
     while (!game.quite) {
         Uint32 frame_start = SDL_GetTicks();
@@ -145,7 +151,7 @@ int main(int argc, char *argv[]) {
 
         switch (game.state) {
             case 0: // Gameplay
-                gameplay(&game);
+                gameplay2(&game);
                 break;
             case 1: // Menu
                 update_buttons(&game, game.current_node->menu->buttonlist, game.current_node->menu->b_ct);
