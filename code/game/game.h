@@ -17,18 +17,23 @@
 #define BLACK (SDL_Color){0,0,0}
 #define WHITE (SDL_Color){255,255,255}
 #define GOLD (SDL_Color){255,215,0}
+#define YELLOW (SDL_Color){255,255,0}
+#define LIGHT_YELLOW (SDL_Color){255,255,153}
 
 // bird dimensions in px :
 #define BIRD_OG_WIDTH 829
 #define BIRD_OG_HEIGHT 773
 
-//paths used :
-//basic config
+// paths used :
+
+
+#define GOOD_BG "../assets/graphics/menu/background.png"
+// basic config
 #define BACK_PNG_PATH "../assets/graphics/basic/back.png"
 #define BUTTON_PNG_PATH "../assets/graphics/menu/white.png"
 #define BUTTON_PNG2_PATH "../assets/graphics/menu/yellow.png"
 //************************************************************************************//
-//bird config
+// bird config
 #define BIRD_R01_PATH "../assets/graphics/characters/bird/flying to the right/b2.png"
 #define BIRD_R02_PATH "../assets/graphics/characters/bird/flying to the right/b2.png"
 #define BIRD_R03_PATH "../assets/graphics/characters/bird/flying to the right/b3.png"
@@ -45,7 +50,7 @@
 #define BIRD_L06_PATH "../assets/graphics/characters/bird/flying to the left/b6.png"
 #define BIRD_L07_PATH "../assets/graphics/characters/bird/flying to the left/b7.png"
 //************************************************************************************//
-//purple bird config
+// purple bird config
 #define P_BIRD_R01_PATH "../assets/graphics/characters/p_bird/right/p1.png"
 #define P_BIRD_R02_PATH "../assets/graphics/characters/p_bird/right/p2.png"
 #define P_BIRD_R03_PATH "../assets/graphics/characters/p_bird/right/p3.png"
@@ -62,14 +67,13 @@
 #define P_BIRD_L06_PATH "../assets/graphics/characters/p_bird/left/p6.png"
 #define P_BIRD_L07_PATH "../assets/graphics/characters/p_bird/left/p7.png"
 //************************************************************************************//
-//font config :
+// font config :
 #define FREDOKA_PATH "../assets/font/fredoka-one.one-regular.ttf"
 //************************************************************************************//
 
 #define LOGO_PATH "../assets/graphics/menu/main_logo.png"
 #define LOGO2_PATH "../assets/graphics/menu/txt_logo.png"
 #define JOJO_PATH "../assets/graphics/basic/jojo.png"
-
 
 #define MUSIC_PATH "../assets/audio/music.mp3"
 #define HOVER_SFX_PATH "../assets/audio/hover.wav"
@@ -114,6 +118,14 @@ typedef struct {
     int isSelected;
 } Button;
 
+
+
+typedef struct {
+    SDL_Color not_hovered_color;
+    SDL_Color hovered_color;
+    SDL_Color active_color;
+} InputStyle;
+
 typedef struct {
     SDL_Surface *bg;
     SDL_Color color;
@@ -146,18 +158,9 @@ typedef struct {
     Uint32 last_cursor_toggle; // Time of last cursor toggle
 } Input_box;
 
-
-
-
-typedef struct
-{
-
+typedef struct {
     SDL_Surface *bg;
     Button b;
-
-
-
-
     SDL_Rect rect;          // Input box rectangle
     Text txt;               // Text displayed inside
     int is_active;          // Whether the input box is active for typing
@@ -169,23 +172,19 @@ typedef struct
     SDL_Surface *active;      // Surface when active
     int cursor_visible;       // Cursor visibility state
     Uint32 last_cursor_toggle; // Time of last cursor toggle
+} My_input;
 
-
-}My_input;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+typedef struct {
+    char jump[32];
+    char left[32];
+    char right[32];
+    char up[32];
+    char down[32];
+    char menu_up[32];
+    char menu_down[32];
+    char menu_select[32];
+    char menu_escape[32];
+} Controls;
 
 typedef struct {
     Button *buttonlist;
@@ -321,12 +320,13 @@ typedef struct {
     Uint32 last_mouse_motion;
     Platform *platforms;
     int platform_count;
-    char player_name[256]; // New field for input box text
-
+    char player_name[256];
+    Controls controls_p1;
+    Controls controls_p2;
 } Game;
 
 int gameplay(Game *game);
 int pizza();
-void handlePlayer2Movement(Player *player, SDL_Event e);
+
 
 #endif //GAME_H

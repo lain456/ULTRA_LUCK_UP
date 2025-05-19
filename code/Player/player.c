@@ -2,6 +2,7 @@
 #include "../tools/tools.h"
 #include "../game/game.h"
 #include <SDL/SDL_image.h>
+#include "../keymap/keymap.h"
 
 void initPlayer(Player *player) {
     if (!player) {
@@ -30,7 +31,7 @@ void initPlayer(Player *player) {
     player->surface = NULL;
     player->index = 0;
     player->cycle = 7;
-    player->frame_counter = 0; // Initialize per-player frame counter
+    player->frame_counter = 0;
     player->jump_count = 0;
     player->max_jumps = 2;
     for (int i = 0; i < 7; i++) {
@@ -496,7 +497,7 @@ void initPlayer(Player *player) {
         return;
     }
 
-    // Set initial surface based on player_num using switch
+    // Set initial surface based on player_num
     switch (player->player_num) {
         case 1: // Purple bird
             player->surface = player->p_flying_to_the_right[0];
@@ -515,31 +516,76 @@ void initPlayer(Player *player) {
     printf("Player sprite loaded successfully (player_num=%d)\n", player->player_num);
 }
 
-void handlePlayerMovement(Player *player, SDL_Event e) {
+void handlePlayerMovement(Game *game ,Player *player, SDL_Event e)
+{
     if (!player) {
         printf("Error: Player pointer is null in handlePlayerMovement\n");
         return;
     }
+
+    const Uint32 JUMP = (Uint32)key_name_to_sdlkey(game->controls_p1.jump);
+    const Uint32 left = key_name_to_sdlkey(game->controls_p1.left);
+    const Uint32 right = key_name_to_sdlkey(game->controls_p1.right);
+    const Uint32 down = key_name_to_sdlkey(game->controls_p1.down);
+    const Uint32 up = key_name_to_sdlkey(game->controls_p1.up);
+
     if (e.type == SDL_KEYDOWN) {
-        switch (e.key.keysym.sym) {
-            case SDLK_q: player->moveLeft = 1; break;
-            case SDLK_d: player->moveRight = 1; break;
-            case SDLK_SPACE:
-                if (!player->jump) {
-                    player->jump_trigger = 1;
-                    printf("Jump triggered\n");
-                }
-                player->jump = 1;
-                break;
+        if (e.key.keysym.sym == left) {
+            player->moveLeft = 1;
+        } else if (e.key.keysym.sym == right) {
+            player->moveRight = 1;
+        } else if (e.key.keysym.sym == JUMP) {
+            if (!player->jump) {
+                player->jump_trigger = 1;
+                printf("Jump triggered\n");
+            }
+            player->jump = 1;
         }
     } else if (e.type == SDL_KEYUP) {
-        switch (e.key.keysym.sym) {
-            case SDLK_q: player->moveLeft = 0; break;
-            case SDLK_d: player->moveRight = 0; break;
-            case SDLK_SPACE: player->jump = 0; break;
+        if (e.key.keysym.sym == left) {
+            player->moveLeft = 0;
+        } else if (e.key.keysym.sym == right) {
+            player->moveRight = 0;
+        } else if (e.key.keysym.sym == JUMP) {
+            player->jump = 0;
         }
     }
 }
+
+
+void handlePlayer2Movement(Game *game, Player *player, SDL_Event e) {
+
+
+    const Uint32 JUMP = (Uint32)key_name_to_sdlkey(game->controls_p2.jump);
+    const Uint32 left = key_name_to_sdlkey(game->controls_p2.left);
+    const Uint32 right = key_name_to_sdlkey(game->controls_p2.right);
+    const Uint32 down = key_name_to_sdlkey(game->controls_p2.down);
+    const Uint32 up = key_name_to_sdlkey(game->controls_p2.up);
+
+    if (e.type == SDL_KEYDOWN) {
+        if (e.key.keysym.sym == left) {
+            player->moveLeft = 1;
+        } else if (e.key.keysym.sym == right) {
+            player->moveRight = 1;
+        } else if (e.key.keysym.sym == JUMP) {
+            if (!player->jump) {
+                player->jump_trigger = 1;
+                printf("Jump triggered\n");
+            }
+            player->jump = 1;
+        }
+    } else if (e.type == SDL_KEYUP) {
+        if (e.key.keysym.sym == left) {
+            player->moveLeft = 0;
+        } else if (e.key.keysym.sym == right) {
+            player->moveRight = 0;
+        } else if (e.key.keysym.sym == JUMP) {
+            player->jump = 0;
+        }
+    }
+}
+
+
 
 void checkPlatformCollision(Player *player, Platform *platform) {
     if (!player || !platform) {
@@ -730,4 +776,3 @@ void freePlayer(Player *player) {
     }
     player->surface = NULL;
 }
-

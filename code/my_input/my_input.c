@@ -22,13 +22,12 @@ static void init_input_text(Game *game, My_input *my_input, int x, int y, int w,
     my_input->txt.font = game->main_font;
     my_input->txt.color = BLACK;
     my_input->txt.writen = my_input->value;
-    // Use a space as fallback to avoid zero-width error
-    my_input->txt.surf = TTF_RenderText_Solid(game->main_font, " ", my_input->txt.color);
+    my_input->txt.surf = TTF_RenderText_Solid(game->main_font, my_input->value[0] ? my_input->value : " ", my_input->txt.color);
     if (my_input->txt.surf) {
         my_input->txt.rect.x = x + (w - my_input->txt.surf->w) / 2;
         my_input->txt.rect.y = y + (h - my_input->txt.surf->h) / 2;
-        printf("Initialized input text: rect=(x=%d, y=%d, w=%d, h=%d)\n",
-               my_input->txt.rect.x, my_input->txt.rect.y, my_input->txt.surf->w, my_input->txt.surf->h);
+        printf("Initialized input text: rect=(x=%d, y=%d, w=%d, h=%d), value='%s'\n",
+               my_input->txt.rect.x, my_input->txt.rect.y, my_input->txt.surf->w, my_input->txt.surf->h, my_input->value);
     } else {
         printf("Failed to render input text: %s\n", TTF_GetError());
         my_input->txt.surf = NULL;
@@ -46,7 +45,7 @@ void init_my_input(Game *game, My_input *my_input, int x, int y, int w, int h, I
     my_input->is_hovered = 0;
     my_input->cursor_visible = 0;
     my_input->last_cursor_toggle = SDL_GetTicks();
-    my_input->max_length = 255;
+    my_input->max_length = 31; // Match Controls char array size
     my_input->value[0] = '\0';
 
     init_input_surfaces(my_input, w, h, style);
@@ -54,13 +53,13 @@ void init_my_input(Game *game, My_input *my_input, int x, int y, int w, int h, I
 }
 
 // Update text surface when value changes
-static void update_input_text(My_input *my_input) {
+void update_input_text(My_input *my_input) {
     if (!my_input->txt.font) {
         printf("Error: my_input->txt.font is NULL\n");
         return;
     }
     my_input->txt.writen = my_input->value;
-    const char *text = (my_input->value[0] || my_input->is_active) ? my_input->value : " ";
+    const char *text = my_input->value[0] ? my_input->value : " ";
     SDL_Surface *new_surf = TTF_RenderText_Solid(my_input->txt.font, text, my_input->txt.color);
     if (new_surf) {
         if (my_input->txt.surf) SDL_FreeSurface(my_input->txt.surf);
@@ -74,15 +73,56 @@ static void update_input_text(My_input *my_input) {
     }
 }
 
-// Update game->player_name with input value
-static void sync_player_name(Game *game, My_input *my_input) {
-    strncpy(game->player_name, my_input->value, sizeof(game->player_name) - 1);
-    game->player_name[sizeof(game->player_name) - 1] = '\0';
-    printf("Synced player_name: '%s'\n", game->player_name);
+// Sync input to game controls (called on Save button)
+ void sync_input(Game *game, My_input *my_input, int input_index) {
+    if (game->current_node->id == 6) { // Help menu
+        strncpy(game->player_name, my_input->value, sizeof(game->player_name) - 1);
+        game->player_name[sizeof(game->player_name) - 1] = '\0';
+        printf("Synced player_name: '%s'\n", game->player_name);
+    } else if (game->current_node->id == 7) { // Controls menu
+        if (input_index == 0) strncpy(game->controls_p1.jump, my_input->value, sizeof(game->controls_p1.jump));
+        else if (input_index == 1) strncpy(game->controls_p1.left, my_input->value, sizeof(game->controls_p1.left));
+        else if (input_index == 2) strncpy(game->controls_p1.right, my_input->value, sizeof(game->controls_p1.right));
+        else if (input_index == 3) strncpy(game->controls_p1.up, my_input->value, sizeof(game->controls_p1.up));
+        else if (input_index == 4) strncpy(game->controls_p1.down, my_input->value, sizeof(game->controls_p1.down));
+        else if (input_index == 5) strncpy(game->controls_p2.jump, my_input->value, sizeof(game->controls_p2.jump));
+        else if (input_index == 6) strncpy(game->controls_p2.left, my_input->value, sizeof(game->controls_p2.left));
+        else if (input_index == 7) strncpy(game->controls_p2.right, my_input->value, sizeof(game->controls_p2.right));
+        else if (input_index == 8) strncpy(game->controls_p2.up, my_input->value, sizeof(game->controls_p2.up));
+        else if (input_index == 9) strncpy(game->controls_p2.down, my_input->value, sizeof(game->controls_p2.down));
+        else if (input_index == 10) {
+            strncpy(game->controls_p1.menu_up, my_input->value, sizeof(game->controls_p1.menu_up));
+            strncpy(game->controls_p2.menu_up, my_input->value, sizeof(game->controls_p2.menu_up));
+        } else if (input_index == 11) {
+            strncpy(game->controls_p1.menu_down, my_input->value, sizeof(game->controls_p1.menu_down));
+            strncpy(game->controls_p2.menu_down, my_input->value, sizeof(game->controls_p2.menu_down));
+        } else if (input_index == 12) {
+            strncpy(game->controls_p1.menu_select, my_input->value, sizeof(game->controls_p1.menu_select));
+            strncpy(game->controls_p2.menu_select, my_input->value, sizeof(game->controls_p2.menu_select));
+        } else if (input_index == 13) {
+            strncpy(game->controls_p1.menu_escape, my_input->value, sizeof(game->controls_p1.menu_escape));
+            strncpy(game->controls_p2.menu_escape, my_input->value, sizeof(game->controls_p2.menu_escape));
+        }
+        printf("Synced control[%d]: key='%s'\n", input_index, my_input->value);
+    }
+}
+
+// Reset controls to defaults
+void reset_controls(Game *game, My_input *my_inputlist) {
+    const char *defaults[] = {
+        "space", "left", "right", "up", "down", // P1
+        "w", "a", "d", "w", "s", // P2
+        "up", "down", "return", "escape" // Navigation
+    };
+    for (int i = 0; i < 14; i++) {
+        strncpy(my_inputlist[i].value, defaults[i], sizeof(my_inputlist[i].value));
+        update_input_text(&my_inputlist[i]);
+    }
 }
 
 void handle_my_input_event(Game *game, My_input *my_input, SDL_Event *event) {
     static int cursor_pos = 0;
+    static int input_index = -1;
     switch (event->type) {
         case SDL_MOUSEMOTION:
             my_input->is_hovered = (event->motion.x >= my_input->rect.x &&
@@ -99,37 +139,53 @@ void handle_my_input_event(Game *game, My_input *my_input, SDL_Event *event) {
                 my_input->last_cursor_toggle = SDL_GetTicks();
                 my_input->bg = my_input->active;
                 cursor_pos = strlen(my_input->value);
-                sync_player_name(game, my_input);
-                printf("Input activated: cursor_pos=%d\n", cursor_pos);
+                for (int i = 0; i < game->current_node->menu->i_ct; i++) {
+                    if (&game->current_node->menu->my_inputlist[i] == my_input) {
+                        input_index = i;
+                        break;
+                    }
+                }
+                printf("Input activated: cursor_pos=%d, input_index=%d\n", cursor_pos, input_index);
             } else {
                 my_input->is_active = 0;
                 my_input->cursor_visible = 0;
                 my_input->bg = my_input->is_hovered ? my_input->hovered : my_input->not_hovered;
+                input_index = -1;
                 printf("Input deactivated\n");
             }
             update_input_text(my_input);
             break;
         case SDL_KEYDOWN:
             if (!my_input->is_active) break;
-            printf("Key down: sym=%d, unicode=%d\n", event->key.keysym.sym, event->key.keysym.unicode);
-            if (event->key.keysym.sym == SDLK_BACKSPACE && cursor_pos > 0) {
-                my_input->value[cursor_pos - 1] = '\0';
-                cursor_pos--;
-                update_input_text(my_input);
-                sync_player_name(game, my_input);
-            } else if (event->key.keysym.sym == SDLK_RETURN) {
-                my_input->is_active = 0;
-                my_input->cursor_visible = 0;
-                my_input->bg = my_input->is_hovered ? my_input->hovered : my_input->not_hovered;
-                update_input_text(my_input);
-                sync_player_name(game, my_input);
-            } else if (event->key.keysym.unicode >= 32 && event->key.keysym.unicode <= 126 &&
-                       cursor_pos < my_input->max_length) {
-                my_input->value[cursor_pos] = (char)event->key.keysym.unicode;
-                my_input->value[cursor_pos + 1] = '\0';
-                cursor_pos++;
-                update_input_text(my_input);
-                sync_player_name(game, my_input);
+            printf("Key down: sym=%d, name='%s'\n", event->key.keysym.sym, SDL_GetKeyName(event->key.keysym.sym));
+            if (game->current_node->id == 6) { // Help menu
+                if (event->key.keysym.sym == SDLK_BACKSPACE && cursor_pos > 0) {
+                    my_input->value[cursor_pos - 1] = '\0';
+                    cursor_pos--;
+                    update_input_text(my_input);
+                } else if (event->key.keysym.sym == SDLK_RETURN) {
+                    my_input->is_active = 0;
+                    my_input->cursor_visible = 0;
+                    my_input->bg = my_input->is_hovered ? my_input->hovered : my_input->not_hovered;
+                    update_input_text(my_input);
+                } else if (event->key.keysym.unicode >= 32 && event->key.keysym.unicode <= 126 &&
+                           cursor_pos < my_input->max_length) {
+                    my_input->value[cursor_pos] = (char)event->key.keysym.unicode;
+                    my_input->value[cursor_pos + 1] = '\0';
+                    cursor_pos++;
+                    update_input_text(my_input);
+                }
+            } else if (game->current_node->id == 7) { // Controls menu
+                const char *key_name = SDL_GetKeyName(event->key.keysym.sym);
+                if (key_name && strlen(key_name) < my_input->max_length) {
+                    strncpy(my_input->value, key_name, my_input->max_length);
+                    my_input->value[my_input->max_length - 1] = '\0';
+                    cursor_pos = strlen(my_input->value);
+                    update_input_text(my_input);
+                    my_input->is_active = 0;
+                    my_input->cursor_visible = 0;
+                    my_input->bg = my_input->is_hovered ? my_input->hovered : my_input->not_hovered;
+                }
             }
             break;
     }

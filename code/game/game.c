@@ -89,9 +89,9 @@ int gameplay(Game *game) {
             if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
                 game->state = 1;
             }
-            handlePlayerMovement(game->player, e);
+            handlePlayerMovement(game,game->player, e);
             if (game->player2 && game->multiplayer) {
-                handlePlayer2Movement(game->player2, e);
+                handlePlayer2Movement(game,game->player2, e);
             }
         }
 
@@ -120,31 +120,6 @@ int gameplay(Game *game) {
     return 0;
 }
 
-void handlePlayer2Movement(Player *player, SDL_Event e) {
-    if (!player) {
-        printf("Error: Player pointer is null in handlePlayer2Movement\n");
-        return;
-    }
-    if (e.type == SDL_KEYDOWN) {
-        switch (e.key.keysym.sym) {
-            case SDLK_LEFT: player->moveLeft = 1; break;
-            case SDLK_RIGHT: player->moveRight = 1; break;
-            case SDLK_UP:
-                if (!player->jump) {
-                    player->jump_trigger = 1;
-                    printf("Player2 jump triggered\n");
-                }
-                player->jump = 1;
-                break;
-        }
-    } else if (e.type == SDL_KEYUP) {
-        switch (e.key.keysym.sym) {
-            case SDLK_LEFT: player->moveLeft = 0; break;
-            case SDLK_RIGHT: player->moveRight = 0; break;
-            case SDLK_UP: player->jump = 0; break;
-        }
-    }
-}
+
 
 int pizza() { return 69; }
-

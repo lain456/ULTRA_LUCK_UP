@@ -40,7 +40,9 @@ add_executable(ULTRA_LUCK_UP
         code/input/input.c
         code/input/input.h
         code/my_input/my_input.c
-        code/my_input/my_input.h  # Add this line if it's missing
+        code/my_input/my_input.h
+        code/keymap/keymap.c
+        code/keymap/keymap.h  # Add this line if it's missing
 )
 
 # Link libraries
