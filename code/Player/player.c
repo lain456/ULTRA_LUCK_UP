@@ -700,8 +700,8 @@ void updatePlayer(Game *game, Player *player) {
         player->h_rect.x = player->rect.x + (player->rect.w / 18);
         player->x_speed = 0;
     }
-    if (player->rect.x > WIDTH - SQUARE_SIZE) {
-        player->rect.x = WIDTH - SQUARE_SIZE;
+    if (player->rect.x > game->lvl_x_size - SQUARE_SIZE) {
+        player->rect.x = game->lvl_x_size - SQUARE_SIZE;
         player->h_rect.x = player->rect.x + (player->rect.w / 18);
         player->x_speed = 0;
     }
@@ -710,8 +710,8 @@ void updatePlayer(Game *game, Player *player) {
         player->h_rect.y = player->rect.y + (player->rect.h / 4);
         player->y_speed = 0;
     }
-    if (player->rect.y > HEIGHT - SQUARE_SIZE) {
-        player->rect.y = HEIGHT - SQUARE_SIZE;
+    if (player->rect.y > game->lvl_y_size - SQUARE_SIZE) {
+        player->rect.y = game->lvl_y_size - SQUARE_SIZE;
         player->h_rect.y = player->rect.y + (player->rect.h / 4);
         player->y_speed = 0;
         player->y_accel = 0;

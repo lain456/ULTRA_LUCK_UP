@@ -310,6 +310,8 @@ typedef struct {
     char player_name[256];
     Controls controls_p1;
     Controls controls_p2;
+    int lvl_x_size;
+    int lvl_y_size;
 } Game;
 
 int gameplay(Game *game);

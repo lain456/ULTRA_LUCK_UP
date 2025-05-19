@@ -152,4 +152,18 @@ void Ini_Game(Game *game) {
     strncpy(game->controls_p2.menu_select, default_controls[13], sizeof(game->controls_p2.menu_select));
 
     printf("Default controls initialized for P1 and P2\n");
+
+
+
+
+
+
+
+
+
+
+
+    // lvls and shit
+    game->lvl_x_size = WIDTH;
+    game->lvl_y_size = HEIGHT;
 }

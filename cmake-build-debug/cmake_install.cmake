@@ -1,4 +1,4 @@
-# Install script for directory: /home/lain/Desktop/nerding/ULTRA-LUCK-UP
+# Install script for directory: /home/lain/Desktop/ULTRA_LUCK_UP_REMASTERED
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -57,6 +57,6 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-  file(WRITE "/home/lain/Desktop/nerding/ULTRA-LUCK-UP/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "/home/lain/Desktop/ULTRA_LUCK_UP_REMASTERED/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

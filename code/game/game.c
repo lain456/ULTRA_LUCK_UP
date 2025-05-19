@@ -154,6 +154,7 @@ int gameplay2(Game *game) {
 
     // Store background dimensions
     int bg_width = scrolling_bg->w;
+
     int bg_height = scrolling_bg->h;
     int screen_width = game->width;
     int screen_height = game->height;
@@ -168,9 +169,11 @@ int gameplay2(Game *game) {
             game->state = 1;
             return 0;
         }
-        bg_width = bg_width * screen_height / bg_height;
+        //bg_width = bg_width * screen_height / bg_height;
         bg_height = screen_height;
     }
+    game->lvl_x_size = scrolling_bg->w; ;
+    game->lvl_y_size = scrolling_bg->h;
 
     // Initialize platforms (relative to background)
     game->platform_count = 3;
@@ -339,7 +342,7 @@ int gameplay2(Game *game) {
         }
 
         // Update camera (currently follows player1)
-        camera_x = update_camera(game->player->x, screen_width, bg_width, SQUARE_SIZE);
+        camera_x = update_camera(game->player->x, game->width, game->lvl_x_size, SQUARE_SIZE);
 
         // Render background
         SDL_Rect src_rect = {camera_x, 0, screen_width, screen_height};
