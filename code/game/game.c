@@ -1,6 +1,7 @@
 #include "game.h"
 #include "../tools/tools.h"
 #include "../Player/player.h"
+#include "arduino/arduino.h"
 #include "../Background/background.h"
 #include "init.h"
 
@@ -255,6 +256,18 @@ int gameplay2(Game *game) {
     int camera_x = 0;
 
     while (game->state == 0 && !game->quite) {
+        if (game->controler_enabled)
+        {
+            game->player->moveRight = 0;
+            game->player->moveLeft = 0;
+            game->player->jump = 0;
+        }
+
+        parse_serial_data(game);
+
+
+
+
         Uint32 frame_start = SDL_GetTicks();
 
         // Clear screen
@@ -272,6 +285,26 @@ int gameplay2(Game *game) {
                 handlePlayer2Movement(game, game->player2, e);
             }
         }
+
+
+
+        if (game->arduino_status.JX > 700 )
+        {
+            game->player->moveRight = 1;
+        }
+
+
+        if (game->arduino_status.JX < 400)
+        {
+            game->player->moveLeft = 1;
+        }
+
+
+        if (game->arduino_status.B12)
+        {
+            game->player->jump_trigger = 1;
+        }
+
 
         // Update player
         updatePlayer(game, game->player);

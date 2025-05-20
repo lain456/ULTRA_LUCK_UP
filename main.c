@@ -10,7 +10,6 @@
 #include "text/txt.h"
 #include "menu/menu.h"
 #include "arduino/arduino.h"
-
 #include "shity_code/shity_code.h"
 #include "my_input/my_input.h"
 
@@ -51,11 +50,22 @@ int main(int argc, char *argv[]) {
         printf("Error: Failed to initialize serial port. Continuing with keyboard input.\n");
         game.controller_active = 0;
     } else {
-        printf("Serial port initialized, but controller disabled for debugging.\n");
-        game.controller_active = 0;
+        printf("Serial port initialized successfully.\n");
+        game.controller_active = 1; // Enable controller by default
     }
 
-    M_node n, n0, n1, n2, n3, n4, n5, n6,n7;
+    // Joystick calibration
+    game.joystick_center_x = 512; // Default center
+    game.joystick_center_y = 512; // Default center
+    if (game.controller_active) {
+        // Read initial joystick values for calibration
+        parse_serial_data(&game);
+        game.joystick_center_x = game.arduino_status.JX;
+        game.joystick_center_y = game.arduino_status.JY;
+        printf("Joystick calibrated: Center X=%d, Y=%d\n", game.joystick_center_x, game.joystick_center_y);
+    }
+
+    M_node n, n0, n1, n2, n3, n4, n5, n6, n7;
     Menu play = play_menu(game);
     Menu exit = exit_menu(game);
     Menu options = options_menu(game);
@@ -77,7 +87,6 @@ int main(int argc, char *argv[]) {
 
     node_Init(&n, &wip, -1);
 
-
     n0.back = &n1;
     n1.back = &n0;
     n2.back = &n1;
@@ -90,14 +99,14 @@ int main(int argc, char *argv[]) {
 
     game.current_node = &n1;
     game.current_menu = n1.menu;
-   // game.state = 0;
-
-
-
 
     reset_controls(&game, n7.menu->my_inputlist);
 
-    // trying to debug
+    // Initialize joystick navigation
+    game.selected_button_index = 0; // Start with first button selected
+    game.joystick_nav_cooldown = 300; // Increased to 300ms for stability
+
+    // Debug controls sync
     for (int i = 0; i < n7.menu->i_ct; i++) {
         sync_input(&game, &game.current_node->menu->my_inputlist[i], i);
     }
@@ -109,12 +118,16 @@ int main(int argc, char *argv[]) {
         game.released_mouse = 0;
         game.mouse_pressed = 0;
 
+        // Read serial data if controller is active
+
+
+
         while (SDL_PollEvent(&game.event)) {
             switch (game.event.type) {
                 case SDL_KEYDOWN:
                     if (game.event.key.keysym.sym == SDLK_ESCAPE && game.state == 1) {
                         game.current_node = game.current_node->back;
-                        game.selected_button_index = -1;
+                        game.selected_button_index = 0;
                         game.select = 0;
                         game.controller_active = 0;
                     }
@@ -139,13 +152,21 @@ int main(int argc, char *argv[]) {
                     game.select = 0;
                     break;
             }
-            // Handle My_input events in help menu
-            if (game.state == 1 && game.current_node->id == 6) {
+            // Handle My_input events in help and controls menu
+            if (game.state == 1 && (game.current_node->id == 6 || game.current_node->id == 7)) {
                 for (int i = 0; i < game.current_node->menu->i_ct; i++) {
                     handle_my_input_event(&game, &game.current_node->menu->my_inputlist[i], &game.event);
                 }
             }
         }
+
+
+
+
+        parse_serial_data(&game);
+        
+
+
 
         render_background(&game);
 
@@ -159,17 +180,17 @@ int main(int argc, char *argv[]) {
                     case -1: // WIP menu
                         if (game.current_node->menu->buttonlist[0].isClicked) {
                             game.current_node = &n1;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                         }
                         break;
                     case 0: // Exit menu
                         if (game.current_node->menu->buttonlist[0].isClicked) {
                             game.current_node = &n1;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                         }
                         if (game.current_node->menu->buttonlist[1].isClicked) {
                             game.quite = 1;
@@ -179,42 +200,39 @@ int main(int argc, char *argv[]) {
                         if (game.current_node->menu->buttonlist[0].isClicked) {
                             printf("Choosing player: single or multiplayer\n");
                             game.current_node = &n4;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                             break;
                         }
                         if (game.current_node->menu->buttonlist[1].isClicked) {
                             game.current_node = &n2;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                             break;
                         }
                         if (game.current_node->menu->buttonlist[2].isClicked) {
                             game.current_node = &n5;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                             break;
                         }
                         if (game.current_node->menu->buttonlist[3].isClicked) {
                             game.current_node = &n0;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                             break;
                         }
                         if (game.current_node->menu->buttonlist[4].isClicked) {
                             game.current_node = &n6;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                             break;
                         }
-
-
-
                         break;
                     case 2: // Options menu
                         if (game.current_node->menu->buttonlist[0].isClicked) {
@@ -236,21 +254,18 @@ int main(int argc, char *argv[]) {
                         if (game.current_node->menu->buttonlist[4].isClicked) {
                             update_txt(&game.current_node->menu->txtlist[0], " welcome back :D", BLACK, game.big_main_font);
                             game.current_node = &n1;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                             break;
                         }
-                        if (game.current_node->menu->buttonlist[3].isClicked)
-                        {
+                        if (game.current_node->menu->buttonlist[3].isClicked) {
                             game.current_node = &n7;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                             break;
                         }
-
-
                         update_slider(&game, &game.current_node->menu->slider_list[0], game.music_volume);
                         update_slider(&game, &game.current_node->menu->slider_list[1], game.sfx_volume);
                         game.music_volume = game.current_node->menu->slider_list[0].val;
@@ -264,9 +279,9 @@ int main(int argc, char *argv[]) {
                                 initPlayer(game.player2);
                             }
                             game.current_node = &n;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                             game.state = 0;
                             printf("Selected yellow bird for player1, player_num=%d\n", game.player->player_num);
                             initPlayer(game.player);
@@ -279,9 +294,9 @@ int main(int argc, char *argv[]) {
                                 initPlayer(game.player2);
                             }
                             game.current_node = &n;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                             game.state = 0;
                             printf("Selected purple bird for player1, player_num=%d\n", game.player->player_num);
                             initPlayer(game.player);
@@ -297,9 +312,9 @@ int main(int argc, char *argv[]) {
                                 game.player2 = NULL;
                             }
                             game.current_node = &n3;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                         }
                         if (game.current_node->menu->buttonlist[1].isClicked) {
                             game.multiplayer = 1;
@@ -315,9 +330,9 @@ int main(int argc, char *argv[]) {
                                 printf("Player2 allocated: player_num=%d\n", game.player2->player_num);
                             }
                             game.current_node = &n3;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                         }
                         break;
                     case 5: // Difficulty menu
@@ -325,68 +340,64 @@ int main(int argc, char *argv[]) {
                             game.state = 2;
                             shity_function(&game, DIFFICULTY_EASY);
                             game.current_node = &n1;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                         }
                         if (game.current_node->menu->buttonlist[1].isClicked) {
                             game.state = 2;
                             shity_function(&game, DIFFICULTY_MEDIUM);
                             game.current_node = &n1;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                         }
                         if (game.current_node->menu->buttonlist[2].isClicked) {
                             game.state = 2;
                             shity_function(&game, DIFFICULTY_HARD);
                             game.current_node = &n1;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                         }
                         if (game.current_node->menu->buttonlist[3].isClicked) {
                             game.current_node = &n1;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                         }
                         break;
                     case 6: // Help menu
                         if (game.current_node->menu->buttonlist[0].isClicked) {
                             printf("Returning to main menu\n");
                             game.current_node = &n1;
-                            game.selected_button_index = -1;
+                            game.selected_button_index = 0;
                             game.select = 0;
-                            game.controller_active = 0;
+                            game.controller_active = 1;
                         }
                         break;
-
-                    case 7:
-                        {
+                    case 7: // Controls menu
+                        for (int i = 0; i < game.current_node->menu->i_ct; i++) {
+                            handle_my_input_event(&game, &game.current_node->menu->my_inputlist[i], &game.event);
+                        }
+                        if (game.current_node->menu->buttonlist[0].isClicked) { // Return
+                            printf("Returning to main menu\n");
+                            game.current_node = &n1;
+                            game.selected_button_index = 0;
+                            game.select = 0;
+                            game.controller_active = 1;
+                        }
+                        if (game.current_node->menu->buttonlist[1].isClicked) { // Save
                             for (int i = 0; i < game.current_node->menu->i_ct; i++) {
-                                handle_my_input_event(&game, &game.current_node->menu->my_inputlist[i], &game.event);
+                                sync_input(&game, &game.current_node->menu->my_inputlist[i], i);
                             }
-
-                            if (game.current_node->menu->buttonlist[0].isClicked) { // Return
-                                printf("Returning to main menu\n");
-                                game.current_node = &n1;
-                                game.selected_button_index = -1;
-                                game.select = 0;
-                                game.controller_active = 0;
-                            }
-                            if (game.current_node->menu->buttonlist[1].isClicked) { // Save
-                                for (int i = 0; i < game.current_node->menu->i_ct; i++) {
-                                    sync_input(&game, &game.current_node->menu->my_inputlist[i], i);
-                                }
-                                printf("Controls saved\n");
-                            }
-                            if (game.current_node->menu->buttonlist[2].isClicked) { // Reset
-                                reset_controls(&game, game.current_node->menu->my_inputlist);
-                                printf("Controls reset to defaults\n");
-                            }
-                            break;
-                        }break;
+                            printf("Controls saved\n");
+                        }
+                        if (game.current_node->menu->buttonlist[2].isClicked) { // Reset
+                            reset_controls(&game, game.current_node->menu->my_inputlist);
+                            printf("Controls reset to defaults\n");
+                        }
+                        break;
                     default:
                         printf("Error: Invalid menu ID\n");
                         break;

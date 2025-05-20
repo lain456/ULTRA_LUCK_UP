@@ -3,6 +3,7 @@
 #include "../game/game.h"
 #include <SDL/SDL_image.h>
 #include "../keymap/keymap.h"
+#include "arduino/arduino.h"
 
 void initPlayer(Player *player) {
     if (!player) {
@@ -519,32 +520,49 @@ void initPlayer(Player *player) {
     printf("Player sprite loaded successfully (player_num=%d)\n", player->player_num);
 }
 
-void handlePlayerMovement(Game *game, Player *player, SDL_Event e) {
+void handlePlayerMovement(Game *game, Player *player, SDL_Event e)
+{
+
+
+
+
+
+
     if (!player) {
         printf("Error: Player pointer is null in handlePlayerMovement\n");
         return;
     }
 
+
+
+
+
+
+    // Existing keyboard input handling
     const Uint32 JUMP = (Uint32)key_name_to_sdlkey(game->controls_p1.jump);
     const Uint32 left = key_name_to_sdlkey(game->controls_p1.left);
     const Uint32 right = key_name_to_sdlkey(game->controls_p1.right);
-    const Uint32 down = key_name_to_sdlkey(game->controls_p1.down);
-    const Uint32 up = key_name_to_sdlkey(game->controls_p1.up);
-    const Uint32 dash = key_name_to_sdlkey(game->controls_p1.dash); // Added for dash
+    const Uint32 dash = key_name_to_sdlkey(game->controls_p1.dash);
+
+
+
+    if (game->arduino_status.B12)
+    {
+        printf("going right ...\n");
+    }
 
     if (e.type == SDL_KEYDOWN) {
         if (e.key.keysym.sym == left) {
             player->moveLeft = 1;
-        } else if (e.key.keysym.sym == right) {
+        } else if (e.key.keysym.sym == right || game->arduino_status.B12) {
             player->moveRight = 1;
-        } else if (e.key.keysym.sym == JUMP) {
+        } else if (e.key.keysym.sym == JUMP ) {
             if (!player->jump) {
                 player->jump_trigger = 1;
                 printf("Jump triggered\n");
             }
             player->jump = 1;
         } else if (e.key.keysym.sym == dash && !player->is_dashing) {
-            // Check if dash is off cooldown
             if (SDL_GetTicks() >= player->dash_cooldown_end) {
                 player->is_dashing = 1;
                 player->dash_start_time = SDL_GetTicks();
@@ -561,6 +579,7 @@ void handlePlayerMovement(Game *game, Player *player, SDL_Event e) {
         }
     }
 }
+
 
 void handlePlayer2Movement(Game *game, Player *player, SDL_Event e) {
     if (!player) {
@@ -645,12 +664,12 @@ void updatePlayer(Game *game, Player *player) {
         player->jump_count++;
         player->jump_trigger = 0;
         is_grounded = 0;
-        printf("Jump %d performed, jump_count=%d, y_speed=%.2f\n", player->jump_count, player->jump_count, player->y_speed);
+        //printf("Jump %d performed, jump_count=%d, y_speed=%.2f\n", player->jump_count, player->jump_count, player->y_speed);
     }
 
     if (is_grounded) {
         player->jump_count = 0;
-        printf("Grounded, jump_count reset to %d\n", player->jump_count);
+        //printf("Grounded, jump_count reset to %d\n", player->jump_count);
     }
 
     // Handle dash
@@ -717,8 +736,7 @@ void updatePlayer(Game *game, Player *player) {
         player->y_accel = 0;
         is_grounded = 1;
         player->jump_count = 0;
-        printf("Landed on ground, jump_count reset to %d, rect.y=%d, h_rect.y=%d\n",
-               player->jump_count, player->rect.y, player->h_rect.y);
+        //printf("Landed on ground, jump_count reset to %d, rect.y=%d, h_rect.y=%d\n",player->jump_count, player->rect.y, player->h_rect.y);
     }
 
     // Check platform collisions

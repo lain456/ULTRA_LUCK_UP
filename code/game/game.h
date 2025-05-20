@@ -312,6 +312,9 @@ typedef struct {
     Controls controls_p2;
     int lvl_x_size;
     int lvl_y_size;
+    int joystick_center_x; // Joystick X-axis center value
+    int joystick_center_y;
+    int controler_enabled;
 } Game;
 
 int gameplay(Game *game);
