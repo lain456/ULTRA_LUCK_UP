@@ -322,6 +322,7 @@ typedef struct {
     LoseHitbox *lose_hitboxes;
     int lose_hitbox_count;
     int last_mouse_motion ;
+    int score;
 } Game;
 
 int gameplay(Game *game);

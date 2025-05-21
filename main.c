@@ -166,8 +166,8 @@ int main(int argc, char *argv[])
 
         switch (game.state) {
         case 0: // Gameplay
-            gameplay3(&game);
-            game.current_node = &n8 ;
+            gameplay4(&game); // Changed from gameplay3 to gameplay4
+            game.current_node = &n8;
             break;
         case 1: // Menu
             update_buttons(&game, game.current_node->menu->buttonlist, game.current_node->menu->b_ct);

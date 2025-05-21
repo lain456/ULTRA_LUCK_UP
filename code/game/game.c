@@ -863,4 +863,344 @@ int gameplay3(Game *game) {
     return 0;
 }
 
+
+
+int gameplay4(Game *game) {
+    if (!game || !game->screen || !game->player) {
+        printf("Error: Invalid game, screen, or player pointer in gameplay4\n");
+        game->state = 1;
+        return 0;
+    }
+
+    // Define background paths for the two levels
+    const char *bg_paths[] = {
+        SIDE_SCROLLING_BG, // Level 1
+        "../assets/graphics/basic/lvl2.png" // Level 2 (12000x1776)
+    };
+    game->level = 0; // Start with level 1
+    SDL_Surface *current_bg = NULL;
+    int bg_width = 0, bg_height = 0;
+    int screen_width = game->width;
+    int screen_height = game->height;
+
+    // Initialize time and score
+    Uint32 start_time = SDL_GetTicks();
+    game->score = 0; // Assume Game struct has a score field
+
+    // Load initial background (level 1)
+    current_bg = IMG_Load(bg_paths[game->level]);
+    if (!current_bg) {
+        printf("Error: Failed to load background %s: %s\n", bg_paths[game->level], IMG_GetError());
+        game->state = 1;
+        return 0;
+    }
+
+    // Store background dimensions
+    bg_width = current_bg->w;
+    bg_height = current_bg->h;
+
+    // Scale level 1 background to fit screen height
+    if (bg_height != screen_height) {
+        SDL_Surface *temp = current_bg;
+        current_bg = scaleSurface(temp, bg_width * screen_height / bg_height, screen_height);
+        SDL_FreeSurface(temp);
+        if (!current_bg) {
+            printf("Error: Failed to scale background %s\n", bg_paths[game->level]);
+            game->state = 1;
+            return 0;
+        }
+        bg_width = bg_width * screen_height / bg_height;
+        bg_height = screen_height;
+    }
+    game->lvl_x_size = bg_width;
+    game->lvl_y_size = bg_height;
+
+    // Initialize platforms for level 1
+    init_platforms(game, game->level, bg_width, screen_height);
+    if (!game->platforms) {
+        printf("Error: Platforms not initialized\n");
+        SDL_FreeSurface(current_bg);
+        game->state = 1;
+        return 0;
+    }
+
+    // Initialize winning hitbox
+    SDL_Rect win_hitbox = {bg_width - 100, 0, 100, screen_height}; // 100px wide, full screen height
+
+    // Initialize player2 if multiplayer
+    if (game->multiplayer && !game->player2) {
+        game->player2 = malloc(sizeof(Player));
+        if (!game->player2) {
+            printf("Error: Failed to allocate player2 in gameplay4\n");
+            free(game->platforms);
+            SDL_FreeSurface(current_bg);
+            game->state = 1;
+            return 0;
+        }
+        game->player2->player_num = 1;
+        initPlayer(game->player2);
+        game->player2->x = bg_width / 8 + 200;
+        game->player2->rect.x = game->player2->x;
+        game->player2->h_rect.x = game->player2->x + (SQUARE_SIZE / 1000);
+        printf("Player2 initialized: player_num=%d, x=%d\n", game->player2->player_num, game->player2->x);
+    }
+
+    // Reset player position
+    game->player->x = bg_width / 8;
+    game->player->rect.x = game->player->x;
+    game->player->h_rect.x = game->player->x + (SQUARE_SIZE / 1000);
+    game->player->y = screen_height - SQUARE_SIZE - 100;
+    game->player->rect.y = game->player->y;
+    game->player->h_rect.y = game->player->y + (SQUARE_SIZE / 3);
+
+    // Initialize camera
+    int camera_x = 0;
+
+    while (game->state == 0 && !game->quite) {
+        if (game->controler_enabled) {
+            game->player->moveRight = 0;
+            game->player->moveLeft = 0;
+            game->player->jump = 0;
+        }
+
+        parse_serial_data(game);
+
+        Uint32 frame_start = SDL_GetTicks();
+
+        // Clear screen
+        SDL_FillRect(game->screen, NULL, SDL_MapRGB(game->screen->format, 0, 0, 0));
+
+        // Handle events
+        SDL_Event e;
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) game->quite = 1;
+            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
+                game->state = 1;
+            }
+            handlePlayerMovement(game, game->player, e);
+            if (game->player2 && game->multiplayer) {
+                handlePlayer2Movement(game, game->player2, e);
+            }
+        }
+
+        if (game->arduino_status.JX > 700) {
+            game->player->moveRight = 1;
+        }
+
+        if (game->arduino_status.JX < 400) {
+            game->player->moveLeft = 1;
+        }
+
+
+
+        // Check for dash (assuming dash_trigger exists; if not, remove this block)
+        if (game->player->dash) {
+            game->score += 15; // Increment score by 15 for dash
+           // game->player->dash_trigger = 0; // Reset to allow new dash scoring
+        }
+
+        // Update player
+        updatePlayer(game, game->player);
+        if (game->player2 && game->multiplayer) {
+            updatePlayer(game, game->player2);
+        }
+
+        // Synchronize player->x and player->rect.x
+        game->player->x = game->player->rect.x;
+        game->player->y = game->player->rect.y;
+        if (game->player2 && game->multiplayer) {
+            game->player2->x = game->player2->rect.x;
+            game->player2->y = game->player2->rect.y;
+        }
+
+        // Clamp player position to background boundaries
+        if (game->player->x < 0) {
+            game->player->x = 0;
+            game->player->rect.x = 0;
+            game->player->h_rect.x = game->player->x + (SQUARE_SIZE / 1000);
+            game->player->x_speed = 0;
+        }
+        if (game->player->x > bg_width - SQUARE_SIZE) {
+            game->player->x = bg_width - SQUARE_SIZE;
+            game->player->rect.x = bg_width - SQUARE_SIZE;
+            game->player->h_rect.x = game->player->x + (SQUARE_SIZE / 1000);
+            game->player->x_speed = 0;
+        }
+        if (game->player->y < 0) {
+            game->player->y = 0;
+            game->player->rect.y = 0;
+            game->player->h_rect.y = game->player->y + (SQUARE_SIZE / 3);
+            game->player->y_speed = 0;
+        }
+        if (game->player->y > screen_height - SQUARE_SIZE) {
+            game->player->y = screen_height - SQUARE_SIZE;
+            game->player->rect.y = screen_height - SQUARE_SIZE;
+            game->player->h_rect.y = game->player->y + (SQUARE_SIZE / 3);
+            game->player->y_speed = 0;
+        }
+
+        // Clamp player2 position
+        if (game->player2 && game->multiplayer) {
+            if (game->player2->x < 0) {
+                game->player2->x = 0;
+                game->player2->rect.x = 0;
+                game->player2->h_rect.x = game->player2->x + (SQUARE_SIZE / 1000);
+                game->player2->x_speed = 0;
+            }
+            if (game->player2->x > bg_width - SQUARE_SIZE) {
+                game->player2->x = bg_width - SQUARE_SIZE;
+                game->player2->rect.x = bg_width - SQUARE_SIZE;
+                game->player2->h_rect.x = game->player2->x + (SQUARE_SIZE / 1000);
+                game->player2->x_speed = 0;
+            }
+            if (game->player2->y < 0) {
+                game->player2->y = 0;
+                game->player2->rect.y = 0;
+                game->player2->h_rect.y = game->player2->y + (SQUARE_SIZE / 3);
+                game->player2->y_speed = 0;
+            }
+            if (game->player2->y > screen_height - SQUARE_SIZE) {
+                game->player2->y = screen_height - SQUARE_SIZE;
+                game->player2->rect.y = screen_height - SQUARE_SIZE;
+                game->player2->h_rect.y = game->player2->y + (SQUARE_SIZE / 3);
+                game->player2->y_speed = 0;
+            }
+        }
+
+        // Check collision with winning hitbox
+        SDL_Rect player_hitbox = game->player->h_rect;
+        if (rect_collide(&player_hitbox, &win_hitbox)) {
+            if (game->level == 0) {
+                game->level = 1;
+                printf("Player collided with winning hitbox, transitioning to level 2\n");
+                // Free current background
+                SDL_FreeSurface(current_bg);
+                // Load level 2 background (12000x1776)
+                current_bg = IMG_Load(bg_paths[game->level]);
+                if (!current_bg) {
+                    printf("Error: Failed to load background %s: %s\n", bg_paths[game->level], IMG_GetError());
+                    free(game->platforms);
+                    game->state = 1;
+                    return 0;
+                }
+                bg_width = current_bg->w; // 12000
+                bg_height = current_bg->h; // 1776
+                // Scale level 2 background to fit screen height
+                if (bg_height != screen_height) {
+                    SDL_Surface *temp = current_bg;
+                    current_bg = scaleSurface(temp, bg_width * screen_height / bg_height, screen_height);
+                    SDL_FreeSurface(temp);
+                    if (!current_bg) {
+                        printf("Error: Failed to scale background %s\n", bg_paths[game->level]);
+                        free(game->platforms);
+                        game->state = 1;
+                        return 0;
+                    }
+                    bg_width = bg_width * screen_height / bg_height; // ~4865
+                    bg_height = screen_height; // 720
+                }
+                // Update level dimensions
+                game->lvl_x_size = bg_width; // ~4865
+                game->lvl_y_size = bg_height; // 720
+                // Reset player position
+                game->player->x = bg_width / 12;
+                game->player->rect.x = game->player->x;
+                game->player->h_rect.x = game->player->x + (SQUARE_SIZE / 1000);
+                game->player->y = screen_height - SQUARE_SIZE - 100;
+                game->player->rect.y = game->player->y;
+                game->player->h_rect.y = game->player->y + (SQUARE_SIZE / 3);
+                if (game->player2 && game->multiplayer) {
+                    game->player2->x = bg_width / 12 + 200;
+                    game->player2->rect.x = game->player2->x;
+                    game->player2->h_rect.x = game->player2->x + (SQUARE_SIZE / 1000);
+                    game->player2->y = screen_height - SQUARE_SIZE - 100;
+                    game->player2->rect.y = game->player2->y;
+                    game->player2->h_rect.y = game->player2->y + (SQUARE_SIZE / 3);
+                }
+                // Re-initialize platforms for level 2
+                init_platforms(game, game->level, bg_width, screen_height);
+                if (!game->platforms) {
+                    printf("Error: Platforms not initialized for level 2\n");
+                    SDL_FreeSurface(current_bg);
+                    game->state = 1;
+                    return 0;
+                }
+                // Update winning hitbox position for level 2
+                win_hitbox.x = bg_width - win_hitbox.w; // ~4865 - 100
+            } else {
+                // Reached end of level 2, return to menu
+                printf("Player collided with winning hitbox, returning to menu\n");
+                game->state = 1;
+                SDL_FreeSurface(current_bg);
+                free(game->platforms);
+                game->platforms = NULL;
+                return 0;
+            }
+        }
+
+        // Update camera (follows player1)
+        camera_x = update_camera(game->player->x, game->width, bg_width, SQUARE_SIZE);
+
+        // Render background (both levels scaled to screen height)
+        SDL_Rect src_rect = {camera_x, 0, screen_width, screen_height};
+        SDL_Rect dst_rect = {0, 0, screen_width, screen_height};
+        // Ensure source rectangle stays within bounds
+        if (src_rect.x + src_rect.w > bg_width) src_rect.w = bg_width - src_rect.x;
+        SDL_BlitSurface(current_bg, &src_rect, game->screen, &dst_rect);
+
+        // Render platforms (adjusted for camera offset)
+        for (int i = 1; i < game->platform_count; i++) {
+            SDL_Rect platform_rect = game->platforms[i].rect;
+            platform_rect.x -= camera_x;
+            SDL_FillRect(game->screen, &platform_rect, SDL_MapRGB(game->screen->format, 255, 255, 255));
+        }
+
+        // Render winning hitbox (green, commented out as in original)
+        SDL_Rect win_hitbox_rect = win_hitbox;
+        win_hitbox_rect.x -= camera_x;
+        //SDL_FillRect(game->screen, &win_hitbox_rect, SDL_MapRGB(game->screen->format, 0, 255, 0));
+
+        // Render players (adjusted for camera offset)
+        SDL_Rect player_rect = game->player->rect;
+        player_rect.x = game->player->x - camera_x;
+        SDL_BlitSurface(game->player->surface, NULL, game->screen, &player_rect);
+        if (game->player2 && game->multiplayer) {
+            SDL_Rect player2_rect = game->player2->rect;
+            player2_rect.x = game->player2->x - camera_x;
+            SDL_BlitSurface(game->player2->surface, NULL, game->screen, &player2_rect);
+        }
+
+        // Display time played and score
+        Uint32 current_time = SDL_GetTicks();
+        float time_played = (current_time - start_time) / 1000.0f; // Convert to seconds
+        char info_text[128];
+        snprintf(info_text, sizeof(info_text), "Level %d | Time: %.1f s | Score: %d",
+                 game->level + 1, time_played, game->score);
+        Text *info_display = safe_create_txt(info_text, game->main_font, WHITE, 10, 10);
+        if (info_display && info_display->surf) {
+            SDL_BlitSurface(info_display->surf, NULL, game->screen, &info_display->rect);
+            SDL_FreeSurface(info_display->surf);
+            free(info_display->writen);
+            free(info_display);
+        }
+
+        // Update screen
+        SDL_Flip(game->screen);
+
+        // Control frame rate
+        Uint32 frame_time = SDL_GetTicks() - frame_start;
+        if (frame_time < 1000 / game->fps) {
+            SDL_Delay(1000 / game->fps - frame_time);
+        }
+    }
+
+    // Cleanup
+    SDL_FreeSurface(current_bg);
+    if (game->platforms) {
+        free(game->platforms);
+        game->platforms = NULL;
+    }
+    return 0;
+}
+
 int pizza() { return 69; }
