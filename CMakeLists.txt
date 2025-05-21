@@ -15,8 +15,6 @@ include_directories(
         ${SDL_IMAGE_INCLUDE_DIR}
         ${SDL_TTF_INCLUDE_DIR}
         ${SDL_MIXER_INCLUDE_DIR}
-        init
-        code
 )
 
 # Add executable with all necessary source files
