@@ -22,28 +22,6 @@ include_directories(
 # Add executable with all necessary source files
 add_executable(ULTRA_LUCK_UP
         main.c
-        code
-        init/init.c
-        code/game/game.c
-        code/button/button.c
-        code/txt/txt.c
-        code/menu/menu.c
-        code/load_menus/load_menus.c
-        code/slider/slider.c
-        code/tools/tools.c
-        code/audio/audio.c
-        code/Background/background.c
-        code/Player/player.c
-        code/arduino/arduino.c
-        shity_code/shity_code.c
-        shity_code/shity_code.h
-
-        code/my_input/my_input.c
-        code/my_input/my_input.h
-        code/keymap/keymap.c
-        code/keymap/keymap.h
-        levels/levels.c
-        levels/levels.h  # Add this line if it's missing
 )
 
 # Link libraries
