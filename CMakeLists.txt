@@ -26,7 +26,7 @@ add_executable(ULTRA_LUCK_UP
         init/init.c
         code/game/game.c
         code/button/button.c
-        code/text/txt.c
+        code/txt/txt.c
         code/menu/menu.c
         code/load_menus/load_menus.c
         code/slider/slider.c
