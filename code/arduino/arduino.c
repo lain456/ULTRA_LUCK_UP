@@ -87,9 +87,11 @@ void parse_serial_data(Game *game) {
 
 
    // printf("Parsed JX: %d, JY: %d\n", game->arduino_status.JX, game->arduino_status.JY);
+    /*
     printf("Arduino State: B9:%d B10:%d B11:%d B12:%d B13:%d JX:%d JY:%d JSW:%d Green:%s Red:%s\n",
                game->arduino_status.B9, game->arduino_status.B10, game->arduino_status.B11,
                game->arduino_status.B12, game->arduino_status.B13, game->arduino_status.JX,
                game->arduino_status.JY, game->arduino_status.JSW,
                game->arduino_status.Green, game->arduino_status.Red);
+    */
 }

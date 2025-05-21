@@ -202,6 +202,10 @@ typedef struct {
 } Platform;
 
 typedef struct {
+    SDL_Rect rect;
+} LoseHitbox;
+
+typedef struct {
     SDL_Color not_hovered_color ;
     SDL_Color hovered_color ;
     SDL_Color active_color ;
@@ -247,6 +251,7 @@ typedef struct {
 } Player;
 
 typedef struct {
+    int level;
     int multiplayer;
     int serial_fd;
     char serial_buffer[256];
@@ -304,7 +309,6 @@ typedef struct {
     Uint32 last_frame_time;
     int select;
     int controller_active;
-    Uint32 last_mouse_motion;
     Platform *platforms;
     int platform_count;
     char player_name[256];
@@ -315,10 +319,15 @@ typedef struct {
     int joystick_center_x; // Joystick X-axis center value
     int joystick_center_y;
     int controler_enabled;
+    LoseHitbox *lose_hitboxes;
+    int lose_hitbox_count;
+    int last_mouse_motion ;
 } Game;
 
 int gameplay(Game *game);
 int gameplay2(Game *game);
+int gameplay3(Game *game);
+int gameplay4(Game *game);
 int pizza();
 
 #endif //GAME_H

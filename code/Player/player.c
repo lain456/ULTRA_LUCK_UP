@@ -682,12 +682,12 @@ void updatePlayer(Game *game, Player *player) {
             // Apply dash movement
             player->x_speed = (player->move == 1) ? DASH_SPEED : -DASH_SPEED;
             // Prevent normal movement inputs during dash
-            player->moveLeft = 0;
-            player->moveRight = 0;
+            //player->moveLeft = 0;
+            //player->moveRight = 0;
         } else {
             // End dash
             player->is_dashing = 0;
-            player->x_speed = 0; // Reset speed after dash
+            player->x_speed = 0 ; // Reset speed after dash
             player->dash_cooldown_end = current_time + DASH_COOLDOWN;
             printf("Dash ended, cooldown until %u\n", player->dash_cooldown_end);
         }

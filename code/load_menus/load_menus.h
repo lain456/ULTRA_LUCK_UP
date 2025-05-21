@@ -29,6 +29,8 @@ Menu multiplayer_menu(Game game);
 Menu help_menu(Game game);
 Menu difficulty_menu(Game game);
 Menu controls_menu(Game game);
+Menu win_menu(Game game);
+Menu lose_menu(Game game) ;
 
 
 #endif //TEST_H
