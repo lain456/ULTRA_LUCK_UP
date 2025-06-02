@@ -4,7 +4,7 @@
 # compile C with /usr/bin/cc
 C_DEFINES = 
 
-C_INCLUDES = -I/usr/include/SDL -I/home/lain/Desktop/ULTRA_LUCK_UP_REMASTERED/init -I/home/lain/Desktop/ULTRA_LUCK_UP_REMASTERED/code
+C_INCLUDES = -I/usr/include/SDL
 
 C_FLAGS = -g -std=gnu11 -fdiagnostics-color=always
 
