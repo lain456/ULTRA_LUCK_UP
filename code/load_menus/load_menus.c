@@ -30,8 +30,8 @@ Menu play_menu(Game game) {
     y_order_buttons(play.buttonlist, play.b_margine, play.b_ct);
 
     play.txtlist[0] = *create_txt("Welcome to Ultra Luck Up!", game.big_main_font, WHITE, (WIDTH - 300) / 2, HEIGHT * 100 / 5);
-    play.txtlist[1] = *create_txt("Choose an option", game.main_font, WHITE, (WIDTH - 200) / 2, HEIGHT * 1 / 10);
-    play.txtlist[2] = *create_txt("Use mouse or arrows to navigate", game.main_font, WHITE, (WIDTH - 300) / 2, HEIGHT * 2 / 10);
+    play.txtlist[1] = *create_txt("HUNTERS x BIRD", game.big_main_font, BLACK, (WIDTH - 200) / 2 -75, HEIGHT * 1 / 10);
+    play.txtlist[2] = *create_txt("           welcome", game.main_font, WHITE, (WIDTH - 300) / 2, HEIGHT * 2 / 10);
 
     return play;
 }
