@@ -1148,7 +1148,7 @@ int gameplay4(Game *game) {
         if (src_rect.x + src_rect.w > bg_width) src_rect.w = bg_width - src_rect.x;
         SDL_BlitSurface(current_bg, &src_rect, game->screen, &dst_rect);
 
-        // Render platforms (adjusted for camera offset)
+        //  Render platforms (adjusted for camera offset)
         for (int i = 1; i < game->platform_count; i++) {
             SDL_Rect platform_rect = game->platforms[i].rect;
             platform_rect.x -= camera_x;

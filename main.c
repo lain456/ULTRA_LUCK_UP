@@ -12,4 +12,4 @@ int main(int argc, char *argv[])
     printf("game is still WIP...\n");
 }
 
-// contact lain456 on discord to get the original file :D
+// contact lain456 on discord to get the original file  :D
